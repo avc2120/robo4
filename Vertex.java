@@ -1,6 +1,8 @@
+import java.util.*;
+
 public class Vertex implements Comparable<Vertex>
 {
-    public Edge[] adjacencies;
+    public List<Edge> adjacencies;
     public double minDistance = Double.POSITIVE_INFINITY;
     public Vertex previous;
 
@@ -11,6 +13,7 @@ public class Vertex implements Comparable<Vertex>
 	{
 		this.x = x;
 		this.y = y;
+		adjacencies = new ArrayList<Edge>();
 	}
 
 	public Vertex()
@@ -56,7 +59,7 @@ public class Vertex implements Comparable<Vertex>
 	{
 		return "(" + x + ", " + y + ")";
 	}
-	
+
     public int compareTo(Vertex other)
     {
         return Double.compare(minDistance, other.minDistance);

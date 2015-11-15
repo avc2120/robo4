@@ -12,6 +12,7 @@ public class PathPlanning
 	{
 		readStartGoal("hw4_start_goal.txt");
 		readObstacles("hw4_world_and_obstacles_convex.txt");
+		buildAdjacency(vertices);
 		dijkstra(start);
 		for(Vertex v: vertices)
 		{
@@ -118,9 +119,19 @@ public class PathPlanning
         return path;
     }
 
-    public static void buildAdjacency(List<Obstacle> obstacles)
+    public static void buildAdjacency(List<Vertex> vertices)
     {
-
+    	for(Vertex v: vertices)
+    	{
+    		for (Vertex ov: vertices)
+    		{
+    			if(ov != v)
+    			{
+    				double dist = Vertex.distance(v,ov);
+    				v.adjacencies.add(new Edge(ov, dist));
+    			}
+    		}
+    	}
     }
 
 
