@@ -1,15 +1,18 @@
 import java.util.*;
+import java.io.*;
+
 public class PathPlanning
 {
-	private Point start;
-	private Point goal;
+	private static Vertex start;
+	private static Vertex goal;
 	private static ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
-	private static ArrayList<Point> vertices = new ArrayList<Point>();
+	private static ArrayList<Vertex> vertices = new ArrayList<Vertex>();
+	
 	public static void main(String[] args)
 	{
-		readStartGoal('hw4_start_goal.txt');
-		readObstacles('hw4_world_and_obstacles_convex.txt');
-		dijkstra(source);
+		readStartGoal("hw4_start_goal.txt");
+		readObstacles("hw4_world_and_obstacles_convex.txt");
+		dijkstra(start);
 		for(Vertex v: vertices)
 		{
 			List<Vertex> path = getShortestPathTo(v);
@@ -17,25 +20,27 @@ public class PathPlanning
 		}
 	}
 
-	public void readStartGoal(String fileName)
+	public static void readStartGoal(String fileName)
 	{
 		try {
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-            if((line = bufferedReader.readLine()) != null) 
+            Scanner in = new Scanner(bufferedReader);
+            if(in.hasNext()) 
             {
-                double[] points = line.split(" ");
-                start = new Vertex(points[0], points[1]);
+            	String line = in.nextLine();
+                String[] points = line.split(" ");
+                start = new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1]));
                 vertices.add(start);
             }
-            if((line = bufferedReader.readLine()) != null) 
+            if(in.hasNext()) 
             {
-                double[] points = line.split(" ");
-                goal = new Vertex(points[0], points[1]);
+            	String line = in.nextLine();
+                String[] points = line.split(" ");
+                goal = new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1]));
                 vertices.add(goal);
             }  
-            bufferedReader.close();         
+            in.close();         
         }
         catch(FileNotFoundException ex) {
             System.out.println("Unable to open file '" + fileName + "'");                
@@ -43,25 +48,34 @@ public class PathPlanning
 
 	}
 
-	public void readObstacles(String fileName)
+	public static void readObstacles(String fileName)
 	{
 		try {
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             Scanner in = new Scanner(bufferedReader);
-			int num_obstacles = in.nextInt();
+            int num_obstacles = in.nextInt();
+			in.nextLine();
 			for(int i = 0; i < num_obstacles; i++)
 			{
+
 				int num_vertices = in.nextInt();
-				Obstacle obstacle = new obstacle();
+				in.nextLine();
+
+				Obstacle obstacle = new Obstacle();
 				for(int j = 0; j < num_vertices; j++)
 				{
-					double[] points = in.nextLine().split(" ");
-					nodes.add(new Vertex(points[0], points[1]));
-					obstacle.addVertex(new Vertex(points[0], points[1]));
+					String[] points = in.nextLine().split(" ");
+					for(String p: points)
+					{
+						System.out.println(p);
+					}
+					vertices.add(new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1])));
+					obstacle.addVertex(new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1])));
 				}
 				obstacles.add(obstacle);
-			}         
+			}
+			in.close();
         }
         catch(FileNotFoundException ex) {
             System.out.println("Unable to open file '" + fileName + "'");                
@@ -103,4 +117,11 @@ public class PathPlanning
         Collections.reverse(path);
         return path;
     }
+
+    public static void buildAdjacency(List<Obstacle> obstacles)
+    {
+
+    }
+
+
 }
