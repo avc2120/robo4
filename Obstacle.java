@@ -1,20 +1,18 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Obstacle
-{
-	private List<Vertex> vertices;
-	public Obstacle()
-	{
-		vertices = new ArrayList<Vertex>();
-	}
+public class Obstacle {
+    private List<Vertex> vertices;
 
-	public void addVertex(Vertex p)
-	{
-		vertices.add(p);
-	}
+    public Obstacle() {
+        vertices = new ArrayList<Vertex>();
+    }
 
-	public List<Vertex> getVertices()
-	{
-		return vertices;
-	}
+    public void addVertex(Vertex p) {
+        vertices.add(p);
+    }
+
+    public List<Vertex> getVertices() {
+        return vertices;
+    }
 }
