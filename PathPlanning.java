@@ -121,6 +121,51 @@ public class PathPlanning extends JFrame {
         }
     }
 
+    /*public Polygon growObstacles(double amount) {
+        assert vertices.size() == numVertices;
+
+        Polygon poly = clone();
+        Point left, right, normleft, normright, p;
+        Point eleft1, eleft2, eright1, eright2; // extended points
+        Point center = new Point(0, 0);
+        int i;
+        // calculate the center of the polygon
+        for (i = 0; i < numVertices; i++)
+            center = center.translate(vertices.get(i));
+        center = center.mult(1 / ((double) numVertices));
+		
+		// move the line segments out
+        for (i = 0; i < numVertices; i++) {
+            // grab two edges
+            left = this.vertices.get((i - 1 + numVertices) % numVertices);
+            p = this.vertices.get(i % numVertices);
+            right = this.vertices.get((i + 1) % numVertices);
+			
+			// turn the normals right side out (center is always inside the polygon
+            normleft = left.sub(p).perpendicular().unit();
+            normright = p.sub(right).perpendicular().unit();
+            if (normleft.dot(p.sub(center)) < 0)
+                normleft = normleft.mult(-1.0);
+            if (normright.dot(p.sub(center)) < 0)
+                normright = normright.mult(-1.0);
+            normleft = normleft.mult(amount);
+            normright = normright.mult(amount);
+			
+			// move the points out
+            eleft1 = left.translate(normleft);
+            eleft2 = p.translate(normleft);
+            eright1 = p.translate(normright);
+            eright2 = right.translate(normright);
+			
+			// find the intersection
+            p = intersectLines(eleft1, eleft2, eright1, eright2);
+            assert p != null;
+
+            poly.vertices.set(i, p);
+        }
+        return poly;
+    }*/
+
     public static void dijkstra(Vertex source) {
         source.minDistance = 0.0;
         PriorityQueue<Vertex> vertexQueue = new PriorityQueue<Vertex>();

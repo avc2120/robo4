@@ -48,7 +48,6 @@ public class Vertex implements Comparable<Vertex> {
         return false;
     }
 
-    // print point
     public String toString() {
         return "(" + x + ", " + y + ")";
     }
@@ -56,15 +55,37 @@ public class Vertex implements Comparable<Vertex> {
     public int compareTo(Vertex other) {
         return Double.compare(minDistance, other.minDistance);
     }
-    // order points lexicographically
-    // public int compareTo(Vertex p)
-    // {
-    // 	if (x < p.x) return -1;
-    // 	if (x > p.x) return  1;
-    // 	if (y < p.y) return -1;
-    // 	if (y > p.y) return  1;
-    // 		return 0;
-    // }
 
+    public Vertex translate(int x, int y) {
+        return new Vertex(this.x + x, this.y + y);
+    }
+
+    public Vertex translate(Vertex vertex) {
+        return new Vertex(this.x + vertex.x, this.y + vertex.y);
+    }
+
+    public Vertex multiply(Double magnitude) {
+        return new Vertex(this.x * magnitude, this.y * magnitude);
+    }
+
+    public Vertex subtract(Vertex vertex) {
+        return new Vertex(this.x - vertex.x, this.y - vertex.y);
+    }
+
+    public Vertex subtract(int x, int y) {
+        return new Vertex(this.x - x, this.y - y);
+    }
+
+    public Vertex perpendicular() {
+        return new Vertex(this.y, -this.x);
+    }
+
+    public Vertex unit() {
+        double dist = distance(this, new Vertex(0, 0));
+        if (dist == 0.0) {
+            return new Vertex(0, 0);
+        }
+        return this.multiply(1 / dist);
+    }
 
 }
