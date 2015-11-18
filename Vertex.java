@@ -143,7 +143,7 @@ public class Vertex implements Comparable<Vertex>
 		Vertex intersection_point;
 		if(intersects(v1,v2,v3,v4))
 		{
-			intersection_point = intersection(v1,v2,v3,v4);
+			intersection_point = lineIntersection(v1,v2,v3,v4);
 			double x = intersection_point.x;
 			if (Math.min(v1.x, v2.x) < x && x < Math.max(v1.x, v2.x) && 
 			Math.min(v3.x, v4.x) < x  && x < Math.max(v3.x, v4.x))
@@ -155,32 +155,49 @@ public class Vertex implements Comparable<Vertex>
 		return false;
 	}
 
-	public static Vertex intersection(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
+
+	public static Vertex intersectLineSegments(Vertex p1, Vertex p2, Vertex p3, Vertex p4)
 	{
-		double m1, m2, b1, b2;
-		double x, y;
-		if(!intersects(v1,v2,v3,v4))
-		{
+		double d1, d2;
+		Vertex p = lineIntersection(p1, p2, p3, p4);
+		if(p == null)
 			return null;
-		}
-
-		m1 = (v1.y - v2.y)/(v1.x - v2.x);
-		m2 = (v3.y - v4.y)/(v3.x - v4.x);
-		b1 = v1.y - m1*v1.x;
-		b2 = v3.y - m2*v3.x;
-
-		x = (b2-b1)/(m1-m2);
-		y = m1*x + b1;
-
-		return new Vertex(x, y);
+		d1 = distance(p1, p2);
+		d2 = distance(p3, p4);
+		// check the line intersections themselves
+		if(d1 < distance(p, p1) || d1 < distance(p, p2) ||
+		   d2 < distance(p, p3) || d2 < distance(p, p4))
+			return null;
+		return p;
 	}
+
+	// public static Vertex intersection(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
+	// {
+	// 	double m1, m2, b1, b2;
+	// 	double x, y;
+	// 	if(!intersects(v1,v2,v3,v4))
+	// 	{
+	// 		System.out.println("Parallel Lines!");
+	// 		return null;
+	// 	}
+
+	// 	m1 = (v1.y - v2.y)/(v1.x - v2.x);
+	// 	m2 = (v3.y - v4.y)/(v3.x - v4.x);
+	// 	b1 = v1.y - m1*v1.x;
+	// 	b2 = v3.y - m2*v3.x;
+
+	// 	x = (b2-b1)/(m1-m2);
+	// 	y = m1*x + b1;
+
+	// 	return new Vertex(x, y);
+	// }
 
 	public static Vertex rayIntersects(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
 	{
 		Vertex intersection = lineIntersection(v1, v2, v3, v4);
 		if(intersection == null)
 		{
-			System.out.println("Lines don't intersect, so Rays don't intersect either!");
+			// System.out.println("Lines don't intersect, so Rays don't intersect either!");
 			return null;
 		}
 		double dist = distance(v3, v4);
@@ -195,11 +212,21 @@ public class Vertex implements Comparable<Vertex>
 	public static Vertex lineIntersection(Vertex p1, Vertex p2, Vertex p3, Vertex p4)
 	{
 
-
+		// double t1, t2, t3, t4, t5, t6, t7;
+		// t1 = p1.x - p2.x;
+		// t2 = p3.x - p4.x;
+		// t3 = p1.y - p2.y;
+		// t4 = p3.y - p4.y;
+		// t5 = p1.x*p2.y - p1.y*p2.x;
+		// t6 = p3.x*p4.y - p3.y*p4.x;
+		// t7 = t1*t4 - t3*t2;
+		// if(t7 == 0.0f)
+		// 	return null;
+		// return new Vertex((t5*t2 - t1*t6)/t7, (t5*t4 - t3*t6)/t7);
 		double difference = (p1.x - p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x);
-		if (difference == 0)
+		if (difference == 0.0)
 		{
-			System.out.println("Lines are Parallel!");
+			// System.out.println("Lines are Parallel!");
 			return null; 
 		}
 		double x = ((p3.x-p4.x)*(p1.x*p2.y-p1.y*p2.x)-(p1.x-p2.x)*(p3.x*p4.y-p3.y*p4.x))/difference;

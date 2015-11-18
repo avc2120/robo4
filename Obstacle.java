@@ -233,6 +233,26 @@ public class Obstacle
 		return p;
 	}
 
+
+	public boolean intersectPolygon(Vertex p1, Vertex p2)
+	{
+		Vertex p3, p4, inter;
+		for(int i = 0; i < num_vertices; i++) {
+			p3 = this.vertices.get(i % num_vertices).clone();
+			p4 = this.vertices.get((i+1) % num_vertices).clone();
+			inter = Vertex.intersectLineSegments(p1,p2, p3,p4);
+			if(inter != null){
+				if(!(inter.equals(p1) || inter.equals(p2))) {
+					return true;
+				}
+			}
+			/* allow movement along a polygon */
+			if((p1.equals(p3) && p2.equals(p4)) || (p2.equals(p3) && p1.equals(p4))) {
+				return false;
+			}
+		}
+		return false;
+	}
 	private void swap(ArrayList<Vertex> pts, int i, int j)
 	{
 		Vertex temp = pts.get(i);
