@@ -1,54 +1,65 @@
+import javax.swing.*;
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.*;
-import java.io.*;
+import java.util.List;
 
-public class PathPlanning
+public class PathPlanning extends JFrame
 {
 	private static Vertex start;
 	private static Vertex goal;
 	private static ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
-	private static ArrayList<Obstacle> sanitized_obstacles = new ArrayList<Obstacle>();
 	private static ArrayList<Obstacle> grown_obstacles = new ArrayList<Obstacle>();
 	private static ArrayList<Vertex> vertices = new ArrayList<Vertex>();
 	private static ArrayList<Vertex> grown_vertices = new ArrayList<Vertex>();
+	private static ArrayList<List<Vertex>> paths = new ArrayList<List<Vertex>>();
 	public static final double robot_width = 0.35;
 	
-	public static void main(String[] args)
+	public PathPlanning() 
 	{
+        setTitle("Path Planning");
+        setSize(new Dimension(650, 350));
+        setVisible(true);
+    }
+
+	public static void main(String[] args)
+	{	
+		Vertex v1 = new Vertex(3,7);
+		Vertex v2 = new Vertex(5,7);
+		Vertex v3 = new Vertex(2,3);
+		Vertex v4 = new Vertex(1,9);
+		System.out.println(Vertex.intersection(v1,v2,v3,v4));
+
 		readStartGoal("hw4_start_goal.txt");
 		System.out.println("Successfully Read Start and Goal File");
 		readObstacles("hw4_world_and_obstacles_convex.txt");
 		System.out.println("Successfully Read Obstacles File");
-
-		//check for overlaps
 		for(int i = 0; i < obstacles.size(); i++)
 		{
-			for(int j=i; j < obstacles.size(); j++)
+			if(i > 0)
 			{
-				ArrayList<Vertex> new_obstacle_vertices = new ArrayList<Vertex>();
-				if(!obstacles.get(i).isOverlap(obstacles.get(j)).isEmpty() || !obstacles.get(j).isOverlap(obstacles.get(i)).isEmpty())
-				{
-					ArrayList<Vertex> overlapping_vertices = obstacles.get(i).isOverlap(obstacles.get(j));
-					overlapping_vertices.addAll(obstacles.get(j).isOverlap(obstacles.get(i)));
-					new_obstacle_vertices.addAll(obstacles.get(i).getVertices());
-					new_obstacle_vertices.addAll(obstacles.get(j).getVertices());
-					for(Vertex overlap_vertex: overlapping_vertices)
-					{
-						new_obstacle_vertices.remove(overlap_vertex);
-					}
-					sanitized_obstacles.add(new Obstacle(new_obstacle_vertices));
-				}
+				Obstacle o = obstacles.get(i).makeConvex();
+				o = o.growObstacles(robot_width/2);
+				grown_obstacles.add(o);
 			}
 		}
-		System.out.println("Succesfully Checked for Overlaps");
-		//grow convex hull of objects
-		for(Obstacle obstacle: sanitized_obstacles)
-		{
-			Obstacle grownObstacle = obstacle.growObstacles(robot_width);
-			grown_obstacles.add(grownObstacle);
-			grown_vertices.addAll(grownObstacle.getVertices());
-		}
-		System.out.println("Successfull Grown Obstacles");
-		// buildAdjacency(vertices);
+		// for(Obstacle o: obstacles.subList(1, obstacles.size()))
+		// {
+		// 	Obstacle grownObstacle = o.makeConvex();
+		// 	grownObstacle = grownObstacle.growObstacles(robot_width/((double)2));
+		// 	grown_obstacles.add(grownObstacle);
+		// 	grown_vertices.addAll(grownObstacle.getVertices());
+		// }
+
+		System.out.println("Successfuly Grown Obstacles");
+		PathPlanning pathPlanning = new PathPlanning();
+		System.out.print("Original: ");
+		System.out.println(obstacles);
+		System.out.println("Grown: ");
+		System.out.println(grown_obstacles);
+		buildAdjacency(grown_vertices);
 		// dijkstra(start);
 		// for(Vertex v: vertices)
 		// {
@@ -66,7 +77,6 @@ public class PathPlanning
             if(in.hasNext()) 
             {
             	String line = in.nextLine();
-            	System.out.println(line);
                 String[] points = line.split(" ");
                 start = new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1]));
                 vertices.add(start);
@@ -107,8 +117,11 @@ public class PathPlanning
 					object_vertices.add(new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1])));	
 				}
 				System.out.println(object_vertices);
-				Obstacle o = new Obstacle(object_vertices);
-				obstacles.add(o);
+				obstacles.add(new Obstacle(object_vertices));
+				if(i==2)
+				{
+					break;
+				}
 			}
         }
         catch(FileNotFoundException ex) {
@@ -153,20 +166,75 @@ public class PathPlanning
         return path;
     }
 
-    public static void buildAdjacency(List<Obstacle> grown_obstacles)
+    public static void buildAdjacency(List<Vertex> vertices) {
+        for (Vertex v : vertices) {
+            for (Vertex ov : vertices) {
+                if (ov != v) {
+                    double dist = Vertex.distance(v, ov);
+                    v.adjacencies.add(new Edge(ov, dist));
+                }
+            }
+        }
+    }
+
+    public void paint(Graphics g) 
     {
-    	return;
-    	// for(Obstacle obstacle: grown_obstacles)
-    	// {
-    	// 	for (Vertex v: obstacle.getVertices())
-    	// 	{
-    	// 		if(ov != v)
-    	// 		{
-    	// 			double dist = Vertex.distance(v,ov);
-    	// 			v.adjacencies.add(new Edge(ov, dist));
-    	// 		}
-    	// 	}
-    	// }
+        g.setColor(Color.cyan);
+        for (Obstacle o : obstacles) {
+            // draw obstacles
+            List<Vertex> vertices = o.getVertices();
+            for (int i = 0; i < vertices.size() - 1; i++) {
+                /*System.out.println((int) (vertices.get(i).y * 40 + 160) + ", " + (int) (vertices.get(i).x * 40 + 180)
+                        + ", " + (int) (vertices.get(i + 1).y * 40 + 160) + ", " + (int) (vertices.get(i + 1).x * 40 + 180));*/
+                g.drawLine((int) (vertices.get(i).y * 40 + 160), (int) (vertices.get(i).x * 40 + 180),
+                        (int) (vertices.get(i + 1).y * 40 + 160), (int) (vertices.get(i + 1).x * 40 + 180));
+            }
+            /*System.out.println((int) (vertices.get(0).y * 40 + 160) + ", " + (int) (vertices.get(0).x * 40 + 180)
+                    + ", " + (int) (vertices.get(vertices.size()-1).y * 40 + 160) + ", " + (int) (vertices.get(vertices.size()-1).x * 40 + 180));*/
+            g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
+                    (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
+        }
+
+        g.setColor(Color.blue);
+        for (Obstacle o : grown_obstacles) {
+            // draw obstacles
+            List<Vertex> vertices = o.getVertices();
+            for (int i = 0; i < vertices.size() - 1; i++) {
+                /*System.out.println((int) (vertices.get(i).y * 40 + 160) + ", " + (int) (vertices.get(i).x * 40 + 180)
+                        + ", " + (int) (vertices.get(i + 1).y * 40 + 160) + ", " + (int) (vertices.get(i + 1).x * 40 + 180));*/
+                g.drawLine((int) (vertices.get(i).y * 40 + 160), (int) (vertices.get(i).x * 40 + 180),
+                        (int) (vertices.get(i + 1).y * 40 + 160), (int) (vertices.get(i + 1).x * 40 + 180));
+        	}
+            /*System.out.println((int) (vertices.get(0).y * 40 + 160) + ", " + (int) (vertices.get(0).x * 40 + 180)
+                    + ", " + (int) (vertices.get(vertices.size()-1).y * 40 + 160) + ", " + (int) (vertices.get(vertices.size()-1).x * 40 + 180));*/
+            g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
+                    (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
+        }
+
+
+        //draw start and end point
+        g.setColor(Color.red);
+        g.drawArc((int) (start.y * 40 + 155), (int) (start.x * 40 + 175), 10, 10, 0, 360);
+        g.drawArc((int) (goal.y * 40 + 155), (int) (goal.x * 40 + 175), 10, 10, 0, 360);
+        System.out.println((int) (paths.get(0).get(0).y * 40 + 160) + ", " + (int) (paths.get(0).get(0).x * 40 + 180)
+                + ", " + (int) (paths.get(0).get(0).y * 40 + 160) + ", " + (int) (paths.get(0).get(0).x * 40 + 180));
+
+        for (int j = 1; j < paths.size() - 2; j++) {
+            List<Vertex> vertices = paths.get(j);
+            // draw paths
+            g.setColor(Color.blue);
+            g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
+                    (int) (vertices.get(1).y * 40 + 160), (int) (vertices.get(1).x * 40 + 180));
+
+        }
+    }
+
+    public void printObstacles(ArrayList<Obstacle> obstacles)
+    {
+    	for(Obstacle o: obstacles)
+    	{
+    		System.out.println(o);
+    	}
     }
 
 

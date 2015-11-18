@@ -194,7 +194,9 @@ public class Vertex implements Comparable<Vertex>
 
 	public static Vertex lineIntersection(Vertex p1, Vertex p2, Vertex p3, Vertex p4)
 	{
-		double difference = (p1.x - p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x*p4.y);
+
+
+		double difference = (p1.x - p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x);
 		if (difference == 0)
 		{
 			System.out.println("Lines are Parallel!");
@@ -212,7 +214,12 @@ public class Vertex implements Comparable<Vertex>
 		{
 			return new Vertex(0,0);
 		}
-		return this.multiply(1/dist);
+		return this.clone().multiply(1/dist);
+	}
+
+	public static double ccw(Vertex p1, Vertex p2, Vertex p3)
+	{
+		return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
 	}
 	
 
