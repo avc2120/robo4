@@ -254,14 +254,15 @@ public class Obstacle
 		return false;
 	}
 	
-	public boolean inSameObstacle(Vertex v1, Vertex v2)
+	public boolean notAdjPointsInObstacle(Vertex v1, Vertex v2)
 	{
 		if (this.vertices.contains(v1) && this.vertices.contains(v2))
 		{
-			if((Math.abs(this.vertices.indexOf(v1)%vertices.size()) - (vertices.indexOf(v2)%vertices.size())) > 1 )
-				return false;
-			else
+			if(!(Math.abs(this.vertices.indexOf(v1)- this.vertices.indexOf(v2)) == 1 || 
+					Math.abs(this.vertices.indexOf(v1)- this.vertices.indexOf(v2)) == vertices.size()-1))
 				return true;
+			else
+				return false;
 		}
 		return false;
 	}

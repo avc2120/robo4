@@ -39,10 +39,10 @@ public class Vertex implements Comparable<Vertex>
 	}
 
 	// Euclidean distance between two points
-	public static double distance(Vertex p1, Vertex p2)
+	public static double distance(Vertex v1, Vertex v2)
 	{
-		double dx = p1.x - p2.x;
-		double dy = p1.y - p2.y;
+		double dx = v1.x - v2.x;
+		double dy = v1.y - v2.y;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
@@ -171,27 +171,6 @@ public class Vertex implements Comparable<Vertex>
 			return null;
 		return p;
 	}
-
-	// public static Vertex intersection(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
-	// {
-	// 	double m1, m2, b1, b2;
-	// 	double x, y;
-	// 	if(!intersects(v1,v2,v3,v4))
-	// 	{
-	// 		System.out.println("Parallel Lines!");
-	// 		return null;
-	// 	}
-
-	// 	m1 = (v1.y - v2.y)/(v1.x - v2.x);
-	// 	m2 = (v3.y - v4.y)/(v3.x - v4.x);
-	// 	b1 = v1.y - m1*v1.x;
-	// 	b2 = v3.y - m2*v3.x;
-
-	// 	x = (b2-b1)/(m1-m2);
-	// 	y = m1*x + b1;
-
-	// 	return new Vertex(x, y);
-	// }
 
 	public static Vertex rayIntersects(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
 	{

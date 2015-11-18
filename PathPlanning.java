@@ -154,6 +154,7 @@ public class PathPlanning extends JFrame
             path.add(vertex);
         }
         Collections.reverse(path);
+//        System.out.println("NUM THINGS IN MY PATH: " + count);
         return path;
     }
 
@@ -176,14 +177,11 @@ public class PathPlanning extends JFrame
     		for(Edge e: v.adjacencies)
     		{
     			Vertex dest = e.target;
-    			double green = e.weight == Double.POSITIVE_INFINITY? 0: 255.0 * ((double) e.weight / maxw);
+    			int colorval = (int)(255.0 *(e.weight / maxw));
+    			Color color = e.weight == Double.POSITIVE_INFINITY? new Color(0,0,0, 0): new Color(colorval, colorval, colorval);
     			
-    			if(e.weight != Double.POSITIVE_INFINITY)
-    			{
-    				System.out.println("Weight: " + e.weight);
-    				System.out.println(green);
-    			}
-	            g.setColor(new Color(0,(int)green, 0));
+    	
+	            g.setColor(color);
 	            g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180),
 	                    (int) (dest.y * 40 + 160), (int) (dest.x * 40 + 180));
     		}
@@ -204,6 +202,7 @@ public class PathPlanning extends JFrame
                 		Vertex mid = v.translate(ov).multiply(0.5);
                 		int idx1 = obs.vertices.indexOf(v);
                 		int idx2 = obs.vertices.indexOf(ov);
+                		//If lies point lies in another shape
                 		if(obs.isInterior(mid) && !obs.equals(room))
                 		{
                 			v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
@@ -212,19 +211,20 @@ public class PathPlanning extends JFrame
                 			edge_added = true;
                 			break;
                 		}
-                		else if(obs.inSameObstacle(v, ov)) 
-						{
-							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
-							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
-//							System.out.println("DONT CONNECT ADJACENT LINES");
-							edge_added = true;
-							break;
-						}
+                		//If intersect other polygons
                 		else if(obs.intersectPolygon(v, ov))
 						{
 							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
 							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
 //							System.out.println("DONT CONNECT IF INTERSECT POLYGON");
+							edge_added = true;
+							break;
+						}
+                		else if(obs.notAdjPointsInObstacle(v, ov)) 
+						{
+							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
+							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
+//							System.out.println("DONT CONNECT ADJACENT LINES");
 							edge_added = true;
 							break;
 						}
@@ -258,19 +258,19 @@ public class PathPlanning extends JFrame
                     (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
         }
         //draws grown objects
-        g.setColor(Color.blue);
-        for (Obstacle o : grown_obstacles) {
-            // draw obstacles
-            List<Vertex> vertices = o.getVertices();
-            for (int i = 0; i < vertices.size() - 1; i++) {
-                g.drawLine((int) (vertices.get(i).y * 40 + 160), (int) (vertices.get(i).x * 40 + 180),
-                        (int) (vertices.get(i + 1).y * 40 + 160), (int) (vertices.get(i + 1).x * 40 + 180));
-        	}
-            g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
-                    (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
-        }
+//        g.setColor(Color.blue);
+//        for (Obstacle o : grown_obstacles) {
+//            // draw obstacles
+//            List<Vertex> vertices = o.getVertices();
+//            for (int i = 0; i < vertices.size() - 1; i++) {
+//                g.drawLine((int) (vertices.get(i).y * 40 + 160), (int) (vertices.get(i).x * 40 + 180),
+//                        (int) (vertices.get(i + 1).y * 40 + 160), (int) (vertices.get(i + 1).x * 40 + 180));
+//        	}
+//            g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
+//                    (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
+//        }
 
-//      displayAdjacency(g);
+      displayAdjacency(g);
         //draw start and end point
         g.setColor(Color.red);
         g.drawArc((int) (start.y * 40 + 155), (int) (start.x * 40 + 175), 10, 10, 0, 360);
