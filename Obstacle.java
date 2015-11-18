@@ -2,43 +2,41 @@ import java.util.*;
 import java.awt.geom.Line2D;
 public class Obstacle
 {
-	private List<Vertex> vertices;
-	private int num_vertices = vertices.size();
+	private ArrayList<Vertex> vertices;
+	private int num_vertices;
 	public Obstacle()
 	{
 		vertices = new ArrayList<Vertex>();
+		num_vertices = 0;
 	}
 
-	public Obstacle(List<Vertex> vertices)
+	public Obstacle(ArrayList<Vertex> vertices)
 	{
 		this.vertices = vertices;
+		num_vertices = vertices.size();
 	}
 
 	public void addVertex(Vertex p)
 	{
 		vertices.add(p);
+		num_vertices++;
 	}
 
-	public List<Vertex> getVertices()
+	public ArrayList<Vertex> getVertices()
 	{
 		return vertices;
 	}
 
 	public Obstacle growObstacles(double robot_width)
 	{
-		Vertex new_obstacle = new Vertex();
+		Obstacle new_obstacle = new Obstacle();
 		Vertex left, right, normleft, normright, p;
 		Vertex eleft1, eleft2, eright1, eright2; // extended points
-		Vertex center = new Vertex(0,0);
-
-		for(int i = 0; i < num_vertices; i++)
-		{
-			center = center.translate(vertices.get(i));
-		}
-		center = center.multiply(1/((double)num_vertices));
+		Vertex center = getCentroid();
+		Vertex new_vertex = new Vertex();
 		
 		/* move the line segments out */
-		for(int i = 0; i < numVertices; i++) 
+		for(int i = 0; i < num_vertices; i++) 
 		{
 			// grab two edges
 			left = this.vertices.get((i-1 + num_vertices) % num_vertices);
@@ -67,71 +65,57 @@ public class Obstacle
 			eright2 = right.translate(normright);
 			
 			/* find the intersection */
-			new_vertex = intersectLines(eleft1, eleft2, eright1, eright2);
+			new_vertex = Vertex.lineIntersection(eleft1, eleft2, eright1, eright2);
 					
 			new_obstacle.addVertex(new_vertex);
 		}
 		return new_obstacle;
 	}
 
-	public static boolean intersects(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
+	public Vertex getCentroid()
 	{
-		if(v1.x - v2.x == 0 || v3.x - v4.x == 0)
-		{
-			if (v1.x - v2.x == 0 && v3.x - v4.x == 0 && !v1.equals(v3))
-			{
-				System.out.println("Parallel Vertical Lines");
-				return false;
-			}
-			else if (v1.x - v2.x == 0 && v3.x - v4.x == 0 && v1.equals(v3))
-			{
-				System.out.println("Same Vertical Line!");
-				return false;
-			}
+		Vertex center = new Vertex(0.0, 0.0);
+		for(int i = 0; i < num_vertices; i++) {
+			center = center.translate(vertices.get(i));
 		}
-		m1 = (v1.y - v2.y)/(v1.x - v2.x);
-		m2 = (v3.y - v4.y)/(v3.x - v4.x);
-		if(m1 == m2)
-		{
-			return false
-		}
-		return true;
+		center = center.multiply(1/(double)num_vertices);
+		return center;
 	}
 
-	public static Vertex intersection(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
+	/*Checks if Vertex is inside Obstacle
+	The number of intersections for a ray passing from exterior of the polygon to any point
+	If odd, point lies inside, and else otherwise*/
+	public boolean isInterior(Vertex v)
 	{
-		double m1, m2, b1, b2;
-		double x, y;
-		if(!intersects(v1,v2,v3,v4))
-		{
-			return null;
+		Vertex center = getCentroid();
+		Vertex direction = v.subtract(center);
+		Vertex v2 = v.translate(direction);
+		Vertex v3, v4, inter;
+		int count = 0;
+		for(int i = 0; i < num_vertices; i++) {
+			v3 = this.vertices.get(i % num_vertices).clone();
+			v4 = this.vertices.get((i+1) % num_vertices).clone();
+			inter = Vertex.rayIntersects(v,v2, v3,v4);
+			if(inter != null) {
+				if(inter.equals(v))
+					continue;
+				count += 1;
+			}
 		}
-
-		m1 = (v1.y - v2.y)/(v1.x - v2.x);
-		m2 = (v3.y - v4.y)/(v3.x - v4.x);
-		b1 = v1.y - m1*v1.x;
-		b2 = v3.y - m2*v3.x;
-
-		x = (b2-b1)/(m1-m2);
-		y = m1*x + b1;
-
-		return new Vertex(x, y);
+		return count % 2 == 1;
 	}
 
-	public static boolean lineSegmentIntersects(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
+	public ArrayList<Vertex> isOverlap(Obstacle obstacle)
 	{
-		Vertex intersection_point;
-		if(intersects(v1,v2,v3,v4))
+		ArrayList<Vertex> vertices = obstacle.getVertices();
+		ArrayList<Vertex> overlapping_vertices = new ArrayList<Vertex>();
+		for(Vertex vertex: vertices)
 		{
-			intersection_point = intersection(v1,v2,v3,v4);
-			double x = intersection_point.x;
-			if (Math.min(v1.x, v2.x) < x && x < Math.max(v1.x, v2.x) && 
-			Math.min(v3.x, v4.x) < x  && x < Math.max(v3.x, v4.x))
+			if(this.isInterior(vertex))
 			{
-				return true;
+				overlapping_vertices.add(vertex);
 			}
-			return false;
 		}
-		return false;
+		return overlapping_vertices;
 	}
 }

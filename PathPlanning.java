@@ -6,20 +6,55 @@ public class PathPlanning
 	private static Vertex start;
 	private static Vertex goal;
 	private static ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
+	private static ArrayList<Obstacle> sanitized_obstacles = new ArrayList<Obstacle>();
+	private static ArrayList<Obstacle> grown_obstacles = new ArrayList<Obstacle>();
 	private static ArrayList<Vertex> vertices = new ArrayList<Vertex>();
-	public static final int robot_width = 0.35;
+	private static ArrayList<Vertex> grown_vertices = new ArrayList<Vertex>();
+	public static final double robot_width = 0.35;
 	
 	public static void main(String[] args)
 	{
 		readStartGoal("hw4_start_goal.txt");
+		System.out.println("Successfully Read Start and Goal File");
 		readObstacles("hw4_world_and_obstacles_convex.txt");
-		buildAdjacency(vertices);
-		dijkstra(start);
-		for(Vertex v: vertices)
+		System.out.println("Successfully Read Obstacles File");
+
+		//check for overlaps
+		for(int i = 0; i < obstacles.size(); i++)
 		{
-			List<Vertex> path = getShortestPathTo(v);
-			System.out.println("Path: " + path);
+			for(int j=i; j < obstacles.size(); j++)
+			{
+				ArrayList<Vertex> new_obstacle_vertices = new ArrayList<Vertex>();
+				if(!obstacles.get(i).isOverlap(obstacles.get(j)).isEmpty() || !obstacles.get(j).isOverlap(obstacles.get(i)).isEmpty())
+				{
+					ArrayList<Vertex> overlapping_vertices = obstacles.get(i).isOverlap(obstacles.get(j));
+					overlapping_vertices.addAll(obstacles.get(j).isOverlap(obstacles.get(i)));
+					new_obstacle_vertices.addAll(obstacles.get(i).getVertices());
+					new_obstacle_vertices.addAll(obstacles.get(j).getVertices());
+					for(Vertex overlap_vertex: overlapping_vertices)
+					{
+						new_obstacle_vertices.remove(overlap_vertex);
+					}
+					sanitized_obstacles.add(new Obstacle(new_obstacle_vertices));
+				}
+			}
 		}
+		System.out.println("Succesfully Checked for Overlaps");
+		//grow convex hull of objects
+		for(Obstacle obstacle: sanitized_obstacles)
+		{
+			Obstacle grownObstacle = obstacle.growObstacles(robot_width);
+			grown_obstacles.add(grownObstacle);
+			grown_vertices.addAll(grownObstacle.getVertices());
+		}
+		System.out.println("Successfull Grown Obstacles");
+		// buildAdjacency(vertices);
+		// dijkstra(start);
+		// for(Vertex v: vertices)
+		// {
+		// 	List<Vertex> path = getShortestPathTo(v);
+		// 	System.out.println("Path: " + path);
+		// }
 	}
 
 	public static void readStartGoal(String fileName)
@@ -31,6 +66,7 @@ public class PathPlanning
             if(in.hasNext()) 
             {
             	String line = in.nextLine();
+            	System.out.println(line);
                 String[] points = line.split(" ");
                 start = new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1]));
                 vertices.add(start);
@@ -56,78 +92,31 @@ public class PathPlanning
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             Scanner in = new Scanner(bufferedReader);
+
             int num_obstacles = in.nextInt();
 			in.nextLine();
 			for(int i = 0; i < num_obstacles; i++)
 			{
-
 				int num_vertices = in.nextInt();
+				System.out.println(num_vertices);
 				in.nextLine();
-
-				Obstacle obstacle = new Obstacle();
+				ArrayList<Vertex> object_vertices = new ArrayList<Vertex>();
 				for(int j = 0; j < num_vertices; j++)
 				{
 					String[] points = in.nextLine().split(" ");
-					for(String p: points)
-					{
-						System.out.println(p);
-					}
-					vertices.add(new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1])));
-					obstacle.addVertex(new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1])));
+					object_vertices.add(new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1])));	
 				}
-				obstacles.add(obstacle);
+				System.out.println(object_vertices);
+				Obstacle o = new Obstacle(object_vertices);
+				obstacles.add(o);
 			}
-			in.close();
         }
         catch(FileNotFoundException ex) {
             System.out.println("Unable to open file '" + fileName + "'");                
         }
 	}
-	public Polygon growObstacles(double amount)
-	{
-		assert vertices.size() == numVertices;
-		
-		Polygon poly = clone();
-		Point left, right, normleft, normright, p;
-		Point eleft1, eleft2, eright1, eright2; // extended points
-		Point center = new Point(0,0);
-		int i;
-		/* calculate the center of the polygon */
-		for(i = 0; i < numVertices; i++)
-			center = center.translate(vertices.get(i));
-		center = center.mult(1/((double)numVertices));
-		
-		/* move the line segments out */
-		for(i = 0; i < numVertices; i++) {
-			// grab two edges
-			left = this.vertices.get((i-1 + numVertices) % numVertices);
-			p = this.vertices.get(i % numVertices);
-			right = this.vertices.get((i+1) % numVertices);
-			
-			/* turn the normals right side out (center is always inside the polygon */
-			normleft  = left.sub(p).perpendicular().unit();
-			normright = p.sub(right).perpendicular().unit();
-			if(normleft.dot(p.sub(center)) < 0)
-				normleft = normleft.mult(-1.0);
-			if(normright.dot(p.sub(center)) < 0)
-				normright = normright.mult(-1.0);
-			normleft = normleft.mult(amount);
-			normright = normright.mult(amount);
-			
-			/* move the points out */
-			eleft1 = left.translate(normleft);
-			eleft2 = p.translate(normleft);
-			eright1 = p.translate(normright);
-			eright2 = right.translate(normright);
-			
-			/* find the intersection */
-			p = intersectLines(eleft1, eleft2, eright1, eright2);
-			assert p != null;
-					
-			poly.vertices.set(i, p);
-		}
-		return poly;
-	}
+
+	
 	public static void dijkstra(Vertex source)
     {
         source.minDistance = 0.0;
@@ -139,10 +128,10 @@ public class PathPlanning
 		    Vertex u = vertexQueue.poll();
 
 	        for (Edge e : u.adjacencies)
-	            {
-	                Vertex v = e.target;
-	                double weight = e.weight;
-	                double distanceThroughU = u.minDistance + weight;
+	        {
+	            Vertex v = e.target;
+	            double weight = e.weight;
+	            double distanceThroughU = u.minDistance + weight;
 			if (distanceThroughU < v.minDistance) {
 			    vertexQueue.remove(v);
 			    v.minDistance = distanceThroughU ;
@@ -164,19 +153,20 @@ public class PathPlanning
         return path;
     }
 
-    public static void buildAdjacency(List<Vertex> vertices)
+    public static void buildAdjacency(List<Obstacle> grown_obstacles)
     {
-    	for(Vertex v: vertices)
-    	{
-    		for (Vertex ov: vertices)
-    		{
-    			if(ov != v)
-    			{
-    				double dist = Vertex.distance(v,ov);
-    				v.adjacencies.add(new Edge(ov, dist));
-    			}
-    		}
-    	}
+    	return;
+    	// for(Obstacle obstacle: grown_obstacles)
+    	// {
+    	// 	for (Vertex v: obstacle.getVertices())
+    	// 	{
+    	// 		if(ov != v)
+    	// 		{
+    	// 			double dist = Vertex.distance(v,ov);
+    	// 			v.adjacencies.add(new Edge(ov, dist));
+    	// 		}
+    	// 	}
+    	// }
     }
 
 
