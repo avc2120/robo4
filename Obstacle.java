@@ -1,5 +1,4 @@
 import java.util.*;
-import java.awt.geom.Line2D;
 public class Obstacle
 {
 	public ArrayList<Vertex> vertices;
@@ -57,6 +56,21 @@ public class Obstacle
 		return num_vertices;
 	}
 
+	public boolean equals(Obstacle other)
+	{
+		ArrayList<Vertex> this_vertices = this.getVertices();
+		ArrayList<Vertex> other_vertices = other.getVertices();
+		int min = other.getVertices().size()<this.getVertices().size()? other.getVertices().size(): this.getVertices().size();
+		for(int i = 0; i < min; i++)
+		{
+			if (!this_vertices.get(i).equals(other_vertices.get(i)))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public Obstacle clone()
 	{
 		Obstacle new_obstacle = new Obstacle();
@@ -75,7 +89,6 @@ public class Obstacle
 		Vertex eleft1, eleft2, eright1, eright2;
 		Vertex center = getCentroid();
 		Vertex new_vertex = new Vertex();
-		System.out.println("Num Vertices: " + num_vertices);
 		/* move the line segments out */
 		for(int i = 0; i < num_vertices; i++) 
 		{
@@ -170,27 +183,32 @@ public class Obstacle
 		}
 		return result;
 	}
-
+	
+	static class VertexComparator implements Comparator<Vertex>
+	 {
+	     public int compare(Vertex v1, Vertex v2)
+	     {
+	    	 if(v1.x < v2.x)
+	    		 return -1;
+	    	 else if(v1.x > v2.x)
+	    		 return 1;
+	    	 else
+	    		 if (v1.y < v2.y)
+	    			 return -1;
+	    		 else if (v1.x > v2.x)
+	    			 return 1;
+	    		 else
+	    			 return 0;
+	     }
+	 }
 	public Obstacle convexHull()
 	{
 		// System.out.println(vertices);
 		Obstacle p = clone();
 		ArrayList<Vertex> pts = (ArrayList<Vertex>)vertices.clone();
 		
-		//sort!!!
-		for(int i = 0; i < pts.size(); i++)
-		{
-			for(int j = i; j < pts.size(); j++)
-			{
-				if(pts.get(j).x < pts.get(i).x)
-					swap(pts, i, j);
-				else if(pts.get(j).x == pts.get(i).x)
-				{
-					if(pts.get(j).y < pts.get(i).y)
-						swap(pts,i,j);
-				}
-			}
-		}
+		Collections.sort(pts, new VertexComparator());
+		
 		
 		ArrayList<Vertex> lower = new ArrayList<Vertex>();
 		for(Vertex pt : pts)
@@ -202,21 +220,9 @@ public class Obstacle
 		lower.remove(lower.size()-1);
 		
 		ArrayList<Vertex> upper = new ArrayList<Vertex>();
-
-		//sort reverse!!!
-		for(int i = 0; i < pts.size(); i++)
-		{
-			for(int j = i; j < pts.size(); j++)
-			{
-				if(pts.get(j).x > pts.get(i).x)
-					swap(pts, i, j);
-				else if(pts.get(j).x == pts.get(i).x)
-				{
-					if(pts.get(j).y > pts.get(i).y)
-						swap(pts,i,j);
-				}
-			}
-		}		
+		
+		Collections.sort(pts, new VertexComparator());
+		Collections.reverse(pts);
 
 		for(Vertex pt : pts)
 		{
@@ -267,11 +273,5 @@ public class Obstacle
 		return false;
 	}
 	
-	private void swap(ArrayList<Vertex> pts, int i, int j)
-	{
-		Vertex temp = pts.get(i);
-		pts.set(i, pts.get(j));
-		pts.set(j, temp);
-	}
 
 }

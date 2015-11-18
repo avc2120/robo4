@@ -40,14 +40,12 @@ public class PathPlanning extends JFrame
 		}
 
 		System.out.println("Successfuly Grown Obstacles");
-
 		buildAdjacency(grown_vertices);
+		System.out.println("Successfully Built Adjacency Matrix");
 		dijkstra(start);
 		System.out.println("Successfully Finished Dijkstra's");
 		for(Vertex v: grown_vertices)
 		{
-			if(v.minDistance != Double.POSITIVE_INFINITY)
-				System.out.println("Distance to " + v + ": " + v.minDistance);
 			ArrayList<Vertex> path = getShortestPathTo(v);
 			paths.add(path);
 		}
@@ -111,6 +109,7 @@ public class PathPlanning extends JFrame
 					room = new Obstacle(object_vertices);
 				}
 			}
+			in.close();
         }
         catch(FileNotFoundException ex) {
             System.out.println("Unable to open file '" + fileName + "'");                
@@ -134,12 +133,10 @@ public class PathPlanning extends JFrame
 		            double distanceThroughU = u.minDistance + e.weight;
 					if (distanceThroughU < v.minDistance) 
 					{
-	//					System.out.println("UPDATING NEW SHORTEST PATH");
 					    vertexQueue.remove(v);
 					    v.minDistance = distanceThroughU ;
 					    v.previous = u;
 					    vertexQueue.add(v);
-					    System.out.println("ADDING NEW VERTEX TO PATH");
 					}
 	            }
             }
@@ -154,7 +151,6 @@ public class PathPlanning extends JFrame
             path.add(vertex);
         }
         Collections.reverse(path);
-//        System.out.println("NUM THINGS IN MY PATH: " + count);
         return path;
     }
 
@@ -190,6 +186,22 @@ public class PathPlanning extends JFrame
     
     public static void buildAdjacency(List<Vertex> grown_vertices) {
     	int count = 0;
+    	ArrayList<Vertex>sanitized_grown_vertices = new ArrayList<Vertex>();
+
+    	for (Vertex v: grown_vertices)
+    	{
+        	if((!room.isInterior(v)))
+        	{
+        		sanitized_grown_vertices.add(v);
+        		
+        	}
+        	else
+        	{
+        		System.out.println("CLEANING OUT VERTICES OUTSIDE ROOM");
+        	}
+    	}
+    	grown_vertices = sanitized_grown_vertices;
+    	
         for (Vertex v : grown_vertices) 
         {
             for (Vertex ov : grown_vertices.subList(grown_vertices.indexOf(v), grown_vertices.size())) 
@@ -200,9 +212,8 @@ public class PathPlanning extends JFrame
                 	for(Obstacle obs: grown_obstacles)
                 	{
                 		Vertex mid = v.translate(ov).multiply(0.5);
-                		int idx1 = obs.vertices.indexOf(v);
-                		int idx2 = obs.vertices.indexOf(ov);
-                		//If lies point lies in another shape
+                		//If vertex not in room
+
                 		if(obs.isInterior(mid) && !obs.equals(room))
                 		{
                 			v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
@@ -240,6 +251,23 @@ public class PathPlanning extends JFrame
                  }
             }
         }
+        for(Obstacle o: grown_obstacles)
+        {
+        	ArrayList<Vertex> vertices = o.getVertices();
+        	for(int i = 0; i <vertices.size()-1; i++)
+        	{
+        		Vertex v = vertices.get(i);
+        		Vertex ov = vertices.get(i+1);
+                double dist = Vertex.distance(v, ov);
+                v.adjacencies.add(new Edge(ov, dist));
+                ov.adjacencies.add(new Edge(v, dist));
+        	}
+        	Vertex v = vertices.get(0);
+        	Vertex ov = vertices.get(vertices.size()-1);
+            double dist = Vertex.distance(v, ov);
+            v.adjacencies.add(new Edge(ov, dist));
+            ov.adjacencies.add(new Edge(v, dist));
+        }
         System.out.println("Count: " + count);
     }
 
@@ -258,19 +286,19 @@ public class PathPlanning extends JFrame
                     (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
         }
         //draws grown objects
-//        g.setColor(Color.blue);
-//        for (Obstacle o : grown_obstacles) {
-//            // draw obstacles
-//            List<Vertex> vertices = o.getVertices();
-//            for (int i = 0; i < vertices.size() - 1; i++) {
-//                g.drawLine((int) (vertices.get(i).y * 40 + 160), (int) (vertices.get(i).x * 40 + 180),
-//                        (int) (vertices.get(i + 1).y * 40 + 160), (int) (vertices.get(i + 1).x * 40 + 180));
-//        	}
-//            g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
-//                    (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
-//        }
+        g.setColor(Color.blue);
+        for (Obstacle o : grown_obstacles) {
+            // draw obstacles
+            List<Vertex> vertices = o.getVertices();
+            for (int i = 0; i < vertices.size() - 1; i++) {
+                g.drawLine((int) (vertices.get(i).y * 40 + 160), (int) (vertices.get(i).x * 40 + 180),
+                        (int) (vertices.get(i + 1).y * 40 + 160), (int) (vertices.get(i + 1).x * 40 + 180));
+        	}
+            g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
+                    (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
+        }
 
-      displayAdjacency(g);
+//      displayAdjacency(g);
         //draw start and end point
         g.setColor(Color.red);
         g.drawArc((int) (start.y * 40 + 155), (int) (start.x * 40 + 175), 10, 10, 0, 360);
@@ -278,12 +306,16 @@ public class PathPlanning extends JFrame
         // System.out.println((int) (paths.get(0).get(0).y * 40 + 160) + ", " + (int) (paths.get(0).get(0).x * 40 + 180)
         //         + ", " + (int) (paths.get(0).get(0).y * 40 + 160) + ", " + (int) (paths.get(0).get(0).x * 40 + 180));
 
-	    for (int j = 1; j < paths.size() - 2; j++) 
+	    for (ArrayList<Vertex> path: paths)
 	    {
-	    	List<Vertex> path_vertices = paths.get(j);
-	    	g.setColor(Color.magenta);
-	    	g.drawLine((int) (path_vertices.get(0).y * 40 + 160), (int) (path_vertices.get(0).x * 40 + 180),
-	    			(int) (path_vertices.get(1).y * 40 + 160), (int) (path_vertices.get(1).x * 40 + 180));
+	    	for(int i = 0; i < path.size()-1; i++)
+	    	{
+	    		Vertex v = path.get(i);
+	    		Vertex ov = path.get(i+1);
+		    	g.setColor(Color.magenta);
+		    	g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180),
+		    			(int) (ov.y * 40 + 160), (int) (ov.x * 40 + 180));
+	    	}
 
         }
     }

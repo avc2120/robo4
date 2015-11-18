@@ -1,4 +1,3 @@
-
 import java.util.*;
 
 public class Vertex implements Comparable<Vertex>
@@ -138,36 +137,17 @@ public class Vertex implements Comparable<Vertex>
 		return true;
 	}
 
-
-	public static boolean lineSegmentIntersects(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
-	{
-		Vertex intersection_point;
-		if(intersects(v1,v2,v3,v4))
-		{
-			intersection_point = lineIntersection(v1,v2,v3,v4);
-			double x = intersection_point.x;
-			if (Math.min(v1.x, v2.x) < x && x < Math.max(v1.x, v2.x) && 
-			Math.min(v3.x, v4.x) < x  && x < Math.max(v3.x, v4.x))
-			{
-				return true;
-			}
-			return false;
-		}
-		return false;
-	}
-
-
-	public static Vertex intersectLineSegments(Vertex p1, Vertex p2, Vertex p3, Vertex p4)
+	public static Vertex intersectLineSegments(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
 	{
 		double d1, d2;
-		Vertex p = lineIntersection(p1, p2, p3, p4);
+		Vertex p = lineIntersection(v1, v2, v3, v4);
 		if(p == null)
 			return null;
-		d1 = distance(p1, p2);
-		d2 = distance(p3, p4);
+		d1 = distance(v1, v2);
+		d2 = distance(v3, v4);
 		// check the line intersections themselves
-		if(d1 < distance(p, p1) || d1 < distance(p, p2) ||
-		   d2 < distance(p, p3) || d2 < distance(p, p4))
+		if(d1 < distance(p, v1) || d1 < distance(p, v2) ||
+		   d2 < distance(p, v3) || d2 < distance(p, v4))
 			return null;
 		return p;
 	}
@@ -189,16 +169,17 @@ public class Vertex implements Comparable<Vertex>
 		return intersection;
 	}
 
-	public static Vertex lineIntersection(Vertex p1, Vertex p2, Vertex p3, Vertex p4)
+	public static Vertex lineIntersection(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
 	{
-		double difference = (p1.x - p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x);
+		
+		double difference = (v1.x - v2.x)*(v3.y-v4.y) - (v1.y-v2.y)*(v3.x-v4.x);
 		if (difference == 0.0)
 		{
-			// System.out.println("Lines are Parallel!");
+//			 System.out.println("Lines are Parallel!");
 			return null; 
 		}
-		double x = ((p3.x-p4.x)*(p1.x*p2.y-p1.y*p2.x)-(p1.x-p2.x)*(p3.x*p4.y-p3.y*p4.x))/difference;
-		double y = ((p3.y-p4.y)*(p1.x*p2.y-p1.y*p2.x)-(p1.y-p2.y)*(p3.x*p4.y-p3.y*p4.x))/difference;
+		double x = ((v3.x-v4.x)*(v1.x*v2.y-v1.y*v2.x)-(v1.x-v2.x)*(v3.x*v4.y-v3.y*v4.x))/difference;
+		double y = ((v3.y-v4.y)*(v1.x*v2.y-v1.y*v2.x)-(v1.y-v2.y)*(v3.x*v4.y-v3.y*v4.x))/difference;
 		return new Vertex(x, y);
 	}
 
@@ -212,9 +193,9 @@ public class Vertex implements Comparable<Vertex>
 		return this.clone().multiply(1/dist);
 	}
 
-	public static double ccw(Vertex p1, Vertex p2, Vertex p3)
+	public static double ccw(Vertex v1, Vertex v2, Vertex v3)
 	{
-		return (p2.x - p1.x)*(p3.y - p1.y) - (p2.y - p1.y)*(p3.x - p1.x);
+		return (v2.x - v1.x)*(v3.y - v1.y) - (v2.y - v1.y)*(v3.x - v1.x);
 	}
 	
 
