@@ -36,36 +36,29 @@ public class PathPlanning extends JFrame
 		System.out.println("Successfully Read Start and Goal File");
 		readObstacles("hw4_world_and_obstacles_convex.txt");
 		System.out.println("Successfully Read Obstacles File");
-		for(int i = 0; i < obstacles.size(); i++)
+		for(Obstacle o: obstacles.subList(1, obstacles.size()))
 		{
-			if(i > 0)
-			{
-				Obstacle o = obstacles.get(i).makeConvex();
-				o = o.growObstacles(robot_width/2);
-				grown_obstacles.add(o);
-			}
+			Obstacle grownObstacle = o.makeConvex();
+			grownObstacle = grownObstacle.growObstacles(robot_width/((double)2));
+			grown_obstacles.add(grownObstacle);
+			grown_vertices.addAll(grownObstacle.getVertices());
 		}
-		// for(Obstacle o: obstacles.subList(1, obstacles.size()))
-		// {
-		// 	Obstacle grownObstacle = o.makeConvex();
-		// 	grownObstacle = grownObstacle.growObstacles(robot_width/((double)2));
-		// 	grown_obstacles.add(grownObstacle);
-		// 	grown_vertices.addAll(grownObstacle.getVertices());
-		// }
 
 		System.out.println("Successfuly Grown Obstacles");
-		PathPlanning pathPlanning = new PathPlanning();
+
 		System.out.print("Original: ");
 		System.out.println(obstacles);
 		System.out.println("Grown: ");
 		System.out.println(grown_obstacles);
 		buildAdjacency(grown_vertices);
-		// dijkstra(start);
-		// for(Vertex v: vertices)
-		// {
-		// 	List<Vertex> path = getShortestPathTo(v);
-		// 	System.out.println("Path: " + path);
-		// }
+		dijkstra(start);
+		for(Vertex v: vertices)
+		{
+			List<Vertex> path = getShortestPathTo(v);
+			paths.add(path);
+			System.out.println("Path: " + path);
+		}
+		PathPlanning pathPlanning = new PathPlanning();
 	}
 
 	public static void readStartGoal(String fileName)
@@ -222,7 +215,7 @@ public class PathPlanning extends JFrame
         for (int j = 1; j < paths.size() - 2; j++) {
             List<Vertex> vertices = paths.get(j);
             // draw paths
-            g.setColor(Color.blue);
+            g.setColor(Color.magenta);
             g.drawLine((int) (vertices.get(0).y * 40 + 160), (int) (vertices.get(0).x * 40 + 180),
                     (int) (vertices.get(1).y * 40 + 160), (int) (vertices.get(1).x * 40 + 180));
 
