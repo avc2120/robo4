@@ -1,8 +1,9 @@
+
 import java.util.*;
 
 public class Vertex implements Comparable<Vertex>
 {
-    public List<Edge> adjacencies;
+    public ArrayList<Edge> adjacencies;
     public double minDistance = Double.POSITIVE_INFINITY;
     public Vertex previous;
 
@@ -211,18 +212,6 @@ public class Vertex implements Comparable<Vertex>
 
 	public static Vertex lineIntersection(Vertex p1, Vertex p2, Vertex p3, Vertex p4)
 	{
-
-		// double t1, t2, t3, t4, t5, t6, t7;
-		// t1 = p1.x - p2.x;
-		// t2 = p3.x - p4.x;
-		// t3 = p1.y - p2.y;
-		// t4 = p3.y - p4.y;
-		// t5 = p1.x*p2.y - p1.y*p2.x;
-		// t6 = p3.x*p4.y - p3.y*p4.x;
-		// t7 = t1*t4 - t3*t2;
-		// if(t7 == 0.0f)
-		// 	return null;
-		// return new Vertex((t5*t2 - t1*t6)/t7, (t5*t4 - t3*t6)/t7);
 		double difference = (p1.x - p2.x)*(p3.y-p4.y) - (p1.y-p2.y)*(p3.x-p4.x);
 		if (difference == 0.0)
 		{

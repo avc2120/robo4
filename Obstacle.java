@@ -171,7 +171,7 @@ public class Obstacle
 		return result;
 	}
 
-	public Obstacle makeConvex()
+	public Obstacle convexHull()
 	{
 		// System.out.println(vertices);
 		Obstacle p = clone();
@@ -253,6 +253,19 @@ public class Obstacle
 		}
 		return false;
 	}
+	
+	public boolean inSameObstacle(Vertex v1, Vertex v2)
+	{
+		if (this.vertices.contains(v1) && this.vertices.contains(v2))
+		{
+			if((Math.abs(this.vertices.indexOf(v1)%vertices.size()) - (vertices.indexOf(v2)%vertices.size())) > 1 )
+				return false;
+			else
+				return true;
+		}
+		return false;
+	}
+	
 	private void swap(ArrayList<Vertex> pts, int i, int j)
 	{
 		Vertex temp = pts.get(i);
