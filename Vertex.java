@@ -81,7 +81,7 @@ public class Vertex implements Comparable<Vertex>
 
 	public String toString()
 	{
-		return "(" + x + ", " + y + ")";
+		return x + " " + y;
 	}
 
     public Vertex translate(int x, int y)
