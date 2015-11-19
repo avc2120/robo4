@@ -203,56 +203,52 @@ public class Obstacle
 	 }
 	public Obstacle convexHull()
 	{
-		// System.out.println(vertices);
-		Obstacle p = clone();
-		ArrayList<Vertex> pts = (ArrayList<Vertex>)vertices.clone();
+		Obstacle o = clone();
+		ArrayList<Vertex> pts = o.getVertices();
 		
 		Collections.sort(pts, new VertexComparator());
 		
-		
-		ArrayList<Vertex> lower = new ArrayList<Vertex>();
+		ArrayList<Vertex> low = new ArrayList<Vertex>();
 		for(Vertex pt : pts)
 		{
-			while(lower.size() >= 2 && Vertex.ccw(lower.get(lower.size()-2), lower.get(lower.size()-1), pt ) <= 0)
-				lower.remove(lower.size()-1); //pop
-			lower.add(pt);
+			while(low.size() >= 2 && Vertex.ccw(low.get(low.size()-2), low.get(low.size()-1), pt ) <= 0)
+				low.remove(low.size()-1); //pop
+			low.add(pt);
 		}
-		lower.remove(lower.size()-1);
+		low.remove(low.size()-1);
 		
-		ArrayList<Vertex> upper = new ArrayList<Vertex>();
+		ArrayList<Vertex> up = new ArrayList<Vertex>();
 		
 		Collections.sort(pts, new VertexComparator());
 		Collections.reverse(pts);
 
 		for(Vertex pt : pts)
 		{
-			while(upper.size() >= 2 && Vertex.ccw(upper.get(upper.size()-2), upper.get(upper.size()-1), pt ) <= 0)
-				upper.remove(upper.size()-1); //pop
-			upper.add(pt);
+			while(up.size() >= 2 && Vertex.ccw(up.get(up.size()-2), up.get(up.size()-1), pt ) <= 0)
+				up.remove(up.size()-1);
+			up.add(pt);
 		}
-		upper.remove(upper.size()-1);
+		up.remove(up.size()-1);
 		
-		lower.addAll(upper);
+		low.addAll(up);
 		
-		p.vertices = (ArrayList<Vertex>)(lower.clone());
-		p.num_vertices = p.vertices.size();
-		return p;
+		o.vertices = (ArrayList<Vertex>)(low.clone());
+		o.num_vertices = o.vertices.size();
+		return o;
 	}
 
 
-	public boolean intersectPolygon(Vertex p1, Vertex p2)
+	public boolean intersectObstacle(Vertex p1, Vertex p2)
 	{
-		Vertex p3, p4, inter;
 		for(int i = 0; i < num_vertices; i++) {
-			p3 = this.vertices.get(i % num_vertices).clone();
-			p4 = this.vertices.get((i+1) % num_vertices).clone();
-			inter = Vertex.intersectLineSegments(p1,p2, p3,p4);
-			if(inter != null){
-				if(!(inter.equals(p1) || inter.equals(p2))) {
-					return true;
-				}
+			//getting adjacent vertices
+			Vertex p3 = this.vertices.get(i % num_vertices).clone();
+			Vertex p4 = this.vertices.get((i+1) % num_vertices).clone();
+			Vertex inter = Vertex.intersectLineSegments(p1,p2, p3,p4);
+			if(inter != null && !(inter.equals(p1) || inter.equals(p2)))
+			{
+				return true;
 			}
-			/* allow movement along a polygon */
 			if((p1.equals(p3) && p2.equals(p4)) || (p2.equals(p3) && p1.equals(p4))) {
 				return false;
 			}
@@ -271,90 +267,6 @@ public class Obstacle
 				return false;
 		}
 		return false;
-	}
-	// Given three colinear points p, q, r, the function checks if
-	// point q lies on line segment 'pr'
-	public static boolean onSegment(Vertex p, Vertex q, Vertex r)
-	{
-	    if (q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) &&
-	            q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y))
-	        return true;
-	    return false;
-	}
-	 
-	// To find orientation of ordered triplet (p, q, r).
-	// The function returns following values
-	// 0 --> p, q and r are colinear
-	// 1 --> Clockwise
-	// 2 --> Counterclockwise
-	public static int orientation(Vertex p, Vertex q, Vertex r)
-	{
-	    double val = (q.y - p.y) * (r.x - q.x) -(q.x - p.x) * (r.y - q.y);
-	 
-	    if (val == 0) return 0;  // colinear
-	    return (val > 0)? 1: 2; // clock or counterclock wise
-	}
-	 
-	// The function that returns true if line segment 'p1q1'
-	// and 'p2q2' intersect.
-	public static boolean doIntersect(Vertex p1, Vertex q1, Vertex p2, Vertex q2)
-	{
-	    // Find the four orientations needed for general and
-	    // special cases
-	    int o1 = orientation(p1, q1, p2);
-	    int o2 = orientation(p1, q1, q2);
-	    int o3 = orientation(p2, q2, p1);
-	    int o4 = orientation(p2, q2, q1);
-	 
-	    // General case
-	    if (o1 != o2 && o3 != o4)
-	        return true;
-	 
-	    // Special Cases
-
-	    if (o1 == 0 && onSegment(p1, p2, q1)) return true;
-
-	    if (o2 == 0 && onSegment(p1, q2, q1)) return true;
-
-	    if (o3 == 0 && onSegment(p2, p1, q2)) return true;
-	 
-	    if (o4 == 0 && onSegment(p2, q1, q2)) return true;
-	 
-	    return false; // Doesn't fall in any of the above cases
-	}
-	 
-	// Returns true if the point p lies inside the polygon[] with n vertices
-	public static boolean isInside(Obstacle obstacles, Vertex p)
-	{
-	    // There must be at least 3 vertices in polygon[]
-		int n = obstacles.getVertices().size();
-	    if (n < 3)  return false;
-	 
-	    // Create a point for line segment from p to infinite
-	    Vertex extreme = new Vertex(Double.POSITIVE_INFINITY, p.y);
-	    // Count intersections of the above line with sides of polygon
-	    int count = 0, i = 0;
-	    do
-	    {
-	        int next = (i+1)%n;
-	 
-	        // Check if the line segment from 'p' to 'extreme' intersects
-	        // with the line segment from 'polygon[i]' to 'polygon[next]'
-	        if (doIntersect(obstacles.getVertices().get(i), obstacles.getVertices().get(next), p, extreme))
-	        {
-	            // If the point 'p' is colinear with line segment 'i-next',
-	            // then check if it lies on segment. If it lies, return true,
-	            // otherwise false
-	            if (orientation(obstacles.getVertices().get(i), p, obstacles.getVertices().get(next)) == 0)
-	               return onSegment(obstacles.getVertices().get(i), p, obstacles.getVertices().get(next));
-	 
-	            count++;
-	        }
-	        i = next;
-	    } while (i != 0);
-	 
-	    // Return true if count is odd, false otherwise
-	    return count%2 == 1; 
 	}
 	
 

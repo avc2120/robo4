@@ -38,33 +38,20 @@ public class PathPlanning extends JFrame
 			grown_obstacles.add(grownObstacle);
 			grown_vertices.addAll(grownObstacle.getVertices());
 		}
-		ArrayList<Vertex> sanitized_grown_vertices = new ArrayList<Vertex>();
-		for(Vertex v: grown_vertices)
-		{
-			if(!Obstacle.isInside(room, v))
-			{
-				sanitized_grown_vertices.add(v);
-			}
-			else
-			{
-				System.out.println("NOT ADDING");
-			}
-		}
-		grown_vertices = sanitized_grown_vertices;
-
 		System.out.println("Successfuly Grown Obstacles");
+		
 		buildAdjacency(grown_vertices);
 		System.out.println("Successfully Built Adjacency Matrix");
+		
 		dijkstra(start);
 		System.out.println("Successfully Finished Dijkstra's");
+		
 		for(Vertex v: grown_vertices)
 		{
 			ArrayList<Vertex> path = getShortestPathTo(v);
 			paths.add(path);
 		}
 		PathPlanning pathPlanning = new PathPlanning();
-		
-
 	}
 
 	public static void readStartGoal(String fileName)
@@ -205,7 +192,6 @@ public class PathPlanning extends JFrame
                 	{
                 		Vertex mid = v.translate(ov).multiply(0.5);
                 		//If vertex not in room
-
                 		if(obs.isInterior(mid) && !obs.equals(room))
                 		{
                 			v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
@@ -214,20 +200,12 @@ public class PathPlanning extends JFrame
                 			edge_added = true;
                 			break;
                 		}
-                		//If intersect other polygons
-                		else if(obs.intersectPolygon(v, ov))
-						{
-							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
-							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
-//							System.out.println("DONT CONNECT IF INTERSECT POLYGON");
-							edge_added = true;
-							break;
-						}
+                		//If not adjacent points in obstacle
                 		else if(obs.notAdjPointsInObstacle(v, ov)) 
 						{
 							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
 							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
-//							System.out.println("DONT CONNECT ADJACENT LINES");
+//							System.out.println("DONT CONNECT NONADJACENT LINES IN SAME OBSTACLE");
 							edge_added = true;
 							break;
 						}
@@ -235,7 +213,16 @@ public class PathPlanning extends JFrame
     					{
 							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
 							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
-//							System.out.println("DONT CONNECT ADJACENT LINES");
+//							System.out.println("DONT CONNECT LINES OUTSIDE ROOM");
+							edge_added = true;
+							break;
+						}
+                		//If intersect other polygons
+                		else if(obs.intersectObstacle(v, ov))
+						{
+							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
+							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
+//							System.out.println("DONT CONNECT IF INTERSECT POLYGON");
 							edge_added = true;
 							break;
 						}
@@ -314,18 +301,18 @@ public class PathPlanning extends JFrame
         // System.out.println((int) (paths.get(0).get(0).y * 40 + 160) + ", " + (int) (paths.get(0).get(0).x * 40 + 180)
         //         + ", " + (int) (paths.get(0).get(0).y * 40 + 160) + ", " + (int) (paths.get(0).get(0).x * 40 + 180));
 
-	    for (ArrayList<Vertex> path: paths)
-	    {
-	    	for(int i = 0; i < path.size()-1; i++)
-	    	{
-	    		Vertex v = path.get(i);
-	    		Vertex ov = path.get(i+1);
-		    	g.setColor(Color.magenta);
-		    	g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180),
-		    			(int) (ov.y * 40 + 160), (int) (ov.x * 40 + 180));
-	    	}
-
-        }
+//	    for (ArrayList<Vertex> path: paths)
+//	    {
+//	    	for(int i = 0; i < path.size()-1; i++)
+//	    	{
+//	    		Vertex v = path.get(i);
+//	    		Vertex ov = path.get(i+1);
+//		    	g.setColor(Color.magenta);
+//		    	g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180),
+//		    			(int) (ov.y * 40 + 160), (int) (ov.x * 40 + 180));
+//	    	}
+//
+//        }
     }
 
     public void printObstacles(ArrayList<Obstacle> obstacles)
