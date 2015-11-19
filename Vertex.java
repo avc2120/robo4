@@ -37,13 +37,11 @@ public class Vertex implements Comparable<Vertex>
         return Double.compare(minDistance, other.minDistance);
     }
 
-	// direction of vector
 	public double direction()
 	{
 		return Math.atan2(y, x);
 	}
 
-	// Euclidean distance between two points
 	public static double distance(Vertex v1, Vertex v2)
 	{
 		double dx = v1.x - v2.x;
@@ -51,7 +49,6 @@ public class Vertex implements Comparable<Vertex>
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
-	// point equality using bit representation
 	public boolean equals(Object o)
 	{
 		if (o instanceof Vertex) {
@@ -61,7 +58,6 @@ public class Vertex implements Comparable<Vertex>
 		return false;
 	}
 
-	// length of vector
 	public double magnitude()
 	{
 		return Math.sqrt(x * x + y * y);
@@ -109,10 +105,8 @@ public class Vertex implements Comparable<Vertex>
 
     public Vertex rotate(double delta_angle)
 	{
-		double angle = Math.atan2(this.y, this.x);
-		double distance = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
-		double x = distance*Math.cos(angle + delta_angle);
-		double y = distance*Math.sin(angle + delta_angle);
+		double x = (Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2)))*Math.cos(Math.atan2(this.y, this.x) + delta_angle);
+		double y = (Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2)))*Math.sin(Math.atan2(this.y, this.x) + delta_angle);
 		return new Vertex(x,y);
 	}
 
@@ -135,6 +129,7 @@ public class Vertex implements Comparable<Vertex>
 		double m2 = (v3.y - v4.y)/(v3.x - v4.x);
 		if(m1 == m2)
 		{
+			System.out.println("Parallel Non-Vertical Lines!");
 			return false;
 		}
 		return true;

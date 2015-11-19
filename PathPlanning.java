@@ -136,21 +136,21 @@ public class PathPlanning extends JFrame
 	public static void dijkstra(Vertex start)
     {
         start.minDistance = 0.0;
-        PriorityQueue<Vertex> vertexQueue = new PriorityQueue<Vertex>();
-      	vertexQueue.add(start);
-		while (!vertexQueue.isEmpty()) 
+        PriorityQueue<Vertex> queue = new PriorityQueue<Vertex>();
+        queue.add(start);
+		while (!queue.isEmpty()) 
 		{
-		    Vertex u = vertexQueue.poll();
+		    Vertex u = queue.poll();
 	        for (Edge e : u.adjacencies)
 	        {
 	            Vertex v = e.target;
 		        double dist = u.minDistance + e.weight;
 		        if (dist < v.minDistance) 
 				{
-		        	vertexQueue.remove(v);
-					v.minDistance = dist ;
+		        	queue.remove(v);
+					v.minDistance = dist;
 					v.previous = u;
-					vertexQueue.add(v);
+					queue.add(v);
 				}
             }
         }
@@ -187,7 +187,6 @@ public class PathPlanning extends JFrame
     		for(Edge e: v.adjacencies)
     		{
     			Vertex dest = e.target;
-    			int colorval = (int)(255.0 *(e.weight / maxw));
     			Color color = e.weight == Double.POSITIVE_INFINITY? new Color(0,0,0,0):Color.blue;
   
 	            g.setColor(color);
