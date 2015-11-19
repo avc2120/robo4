@@ -204,12 +204,10 @@ public class Obstacle
 	public Obstacle convexHull()
 	{
 		Obstacle o = clone();
-		ArrayList<Vertex> pts = o.getVertices();
-		
-		Collections.sort(pts, new VertexComparator());
-		
+		ArrayList<Vertex> vtx = o.getVertices();
+		Collections.sort(vtx, new VertexComparator());
 		ArrayList<Vertex> low = new ArrayList<Vertex>();
-		for(Vertex pt : pts)
+		for(Vertex pt : vtx)
 		{
 			while(low.size() >= 2 && Vertex.ccw(low.get(low.size()-2), low.get(low.size()-1), pt ) <= 0)
 				low.remove(low.size()-1); //pop
@@ -219,10 +217,10 @@ public class Obstacle
 		
 		ArrayList<Vertex> up = new ArrayList<Vertex>();
 		
-		Collections.sort(pts, new VertexComparator());
-		Collections.reverse(pts);
+		Collections.sort(vtx, new VertexComparator());
+		Collections.reverse(vtx);
 
-		for(Vertex pt : pts)
+		for(Vertex pt : vtx)
 		{
 			while(up.size() >= 2 && Vertex.ccw(up.get(up.size()-2), up.get(up.size()-1), pt ) <= 0)
 				up.remove(up.size()-1);

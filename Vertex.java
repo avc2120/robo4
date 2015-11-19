@@ -139,15 +139,13 @@ public class Vertex implements Comparable<Vertex>
 
 	public static Vertex intersectLineSegments(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
 	{
-		double d1, d2;
 		Vertex p = lineIntersection(v1, v2, v3, v4);
 		if(p == null)
 			return null;
-		d1 = distance(v1, v2);
-		d2 = distance(v3, v4);
+		double d1 = distance(v1, v2);
+		double d2 = distance(v3, v4);
 		// check the line intersections themselves
-		if(d1 < distance(p, v1) || d1 < distance(p, v2) ||
-		   d2 < distance(p, v3) || d2 < distance(p, v4))
+		if(d1 < distance(p, v1) || d1 < distance(p, v2) || d2 < distance(p, v3) || d2 < distance(p, v4))
 			return null;
 		return p;
 	}
@@ -171,16 +169,26 @@ public class Vertex implements Comparable<Vertex>
 
 	public static Vertex lineIntersection(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
 	{
-		
-		double difference = (v1.x - v2.x)*(v3.y-v4.y) - (v1.y-v2.y)*(v3.x-v4.x);
-		if (difference == 0.0)
-		{
-//			 System.out.println("Lines are Parallel!");
-			return null; 
-		}
-		double x = ((v3.x-v4.x)*(v1.x*v2.y-v1.y*v2.x)-(v1.x-v2.x)*(v3.x*v4.y-v3.y*v4.x))/difference;
-		double y = ((v3.y-v4.y)*(v1.x*v2.y-v1.y*v2.x)-(v1.y-v2.y)*(v3.x*v4.y-v3.y*v4.x))/difference;
-		return new Vertex(x, y);
+		double t1, t2, t3, t4, t5, t6, t7;
+		t1 = v1.x - v2.x;
+		t2 = v3.x - v4.x;
+		t3 = v1.y - v2.y;
+		t4 = v3.y - v4.y;
+		t5 = v1.x*v2.y - v1.y*v2.x;
+		t6 = v3.x*v4.y - v3.y*v4.x;
+		t7 = t1*t4 - t3*t2;
+		if(t7 == 0.0f)
+			return null;
+		return new Vertex((t5*t2 - t1*t6)/t7, (t5*t4 - t3*t6)/t7);
+//		double difference = (v1.x - v2.x)*(v3.y-v4.y) - (v1.y-v2.y)*(v3.x-v4.x);
+//		if (difference == 0.0)
+//		{
+////			 System.out.println("Lines are Parallel!");
+//			return null; 
+//		}
+//		double x = ((v3.x-v4.x)*(v1.x*v2.y-v1.y*v2.x)-(v1.x-v2.x)*(v3.x*v4.y-v3.y*v4.x))/difference;
+//		double y = ((v3.y-v4.y)*(v1.x*v2.y-v1.y*v2.x)-(v1.y-v2.y)*(v3.x*v4.y-v3.y*v4.x))/difference;
+//		return new Vertex(x, y);
 	}
 
 	public Vertex unit()
