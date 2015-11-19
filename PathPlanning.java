@@ -38,6 +38,19 @@ public class PathPlanning extends JFrame
 			grown_obstacles.add(grownObstacle);
 			grown_vertices.addAll(grownObstacle.getVertices());
 		}
+		ArrayList<Vertex> sanitized_grown_vertices = new ArrayList<Vertex>();
+		for(Vertex v: grown_vertices)
+		{
+			if(!Obstacle.isInside(room, v))
+			{
+				sanitized_grown_vertices.add(v);
+			}
+			else
+			{
+				System.out.println("NOT ADDING");
+			}
+		}
+		grown_vertices = sanitized_grown_vertices;
 
 		System.out.println("Successfuly Grown Obstacles");
 		buildAdjacency(grown_vertices);
@@ -94,7 +107,6 @@ public class PathPlanning extends JFrame
 			for(int i = 0; i < num_obstacles; i++)
 			{
 				int num_vertices = in.nextInt();
-				System.out.println(num_vertices);
 				in.nextLine();
 				ArrayList<Vertex> object_vertices = new ArrayList<Vertex>();
 				for(int j = 0; j < num_vertices; j++)
@@ -104,7 +116,7 @@ public class PathPlanning extends JFrame
 				}
 				System.out.println(object_vertices.size());
 				obstacles.add(new Obstacle(object_vertices));
-				if(i == 1)
+				if(i == 0)
 				{
 					room = new Obstacle(object_vertices);
 				}
@@ -121,24 +133,20 @@ public class PathPlanning extends JFrame
         source.minDistance = 0.0;
         PriorityQueue<Vertex> vertexQueue = new PriorityQueue<Vertex>();
       	vertexQueue.add(source);
-
 		while (!vertexQueue.isEmpty()) 
 		{
 		    Vertex u = vertexQueue.poll();
 	        for (Edge e : u.adjacencies)
 	        {
 	            Vertex v = e.target;
-	            if(e.weight != Double.POSITIVE_INFINITY)
-	            {
-		            double distanceThroughU = u.minDistance + e.weight;
-					if (distanceThroughU < v.minDistance) 
-					{
-					    vertexQueue.remove(v);
-					    v.minDistance = distanceThroughU ;
-					    v.previous = u;
-					    vertexQueue.add(v);
-					}
-	            }
+		        double distanceThroughU = u.minDistance + e.weight;
+		        if (distanceThroughU < v.minDistance) 
+				{
+		        	vertexQueue.remove(v);
+					v.minDistance = distanceThroughU ;
+					v.previous = u;
+					vertexQueue.add(v);
+				}
             }
         }
     }
@@ -184,24 +192,8 @@ public class PathPlanning extends JFrame
     	}
     }
     
-    public static void buildAdjacency(List<Vertex> grown_vertices) {
-    	int count = 0;
-    	ArrayList<Vertex>sanitized_grown_vertices = new ArrayList<Vertex>();
-
-    	for (Vertex v: grown_vertices)
-    	{
-        	if((!room.isInterior(v)))
-        	{
-        		sanitized_grown_vertices.add(v);
-        		
-        	}
-        	else
-        	{
-        		System.out.println("CLEANING OUT VERTICES OUTSIDE ROOM");
-        	}
-    	}
-    	grown_vertices = sanitized_grown_vertices;
-    	
+    public static void buildAdjacency(List<Vertex> grown_vertices) 
+    {
         for (Vertex v : grown_vertices) 
         {
             for (Vertex ov : grown_vertices.subList(grown_vertices.indexOf(v), grown_vertices.size())) 
@@ -239,36 +231,52 @@ public class PathPlanning extends JFrame
 							edge_added = true;
 							break;
 						}
-
+                		else if (!room.isInterior(v) || !room.isInterior(ov))
+    					{
+							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
+							ov.adjacencies.add(new Edge(v, Double.POSITIVE_INFINITY));
+//							System.out.println("DONT CONNECT ADJACENT LINES");
+							edge_added = true;
+							break;
+						}
                 	}
                 	if(edge_added == false)
                 	{
 	                    double dist = Vertex.distance(v, ov);
 	                    v.adjacencies.add(new Edge(ov, dist));
 	                    ov.adjacencies.add(new Edge(v, dist));
-	                    count++;
                 	}
                  }
             }
+            
         }
-        for(Obstacle o: grown_obstacles)
-        {
-        	ArrayList<Vertex> vertices = o.getVertices();
-        	for(int i = 0; i <vertices.size()-1; i++)
-        	{
-        		Vertex v = vertices.get(i);
-        		Vertex ov = vertices.get(i+1);
-                double dist = Vertex.distance(v, ov);
-                v.adjacencies.add(new Edge(ov, dist));
-                ov.adjacencies.add(new Edge(v, dist));
-        	}
-        	Vertex v = vertices.get(0);
-        	Vertex ov = vertices.get(vertices.size()-1);
-            double dist = Vertex.distance(v, ov);
-            v.adjacencies.add(new Edge(ov, dist));
-            ov.adjacencies.add(new Edge(v, dist));
-        }
-        System.out.println("Count: " + count);
+        
+//        for(Obstacle o: grown_obstacles)
+//        {
+//        	ArrayList<Vertex> vertices = o.getVertices();
+//        	for(int i = 0; i <vertices.size()-1; i++)
+//        	{
+//        		if(Obstacle.isInside(room,vertices.get(i)) && Obstacle.isInside(room,vertices.get(i+1)) )
+//        		{
+//	        		Vertex v = vertices.get(i);
+//	        		Vertex ov = vertices.get(i+1);
+//	                double dist = Vertex.distance(v, ov);
+//	                v.adjacencies.add(new Edge(ov, dist));
+//	                ov.adjacencies.add(new Edge(v, dist));
+//        		}
+//        	}
+//    		if(Obstacle.isInside(room,vertices.get(0)) && Obstacle.isInside(room,vertices.get(vertices.size()-1)) )
+//    		{
+//	        	Vertex v = vertices.get(0);
+//	        	Vertex ov = vertices.get(vertices.size()-1);
+//	            double dist = Vertex.distance(v, ov);
+//	            v.adjacencies.add(new Edge(ov, dist));
+//	            ov.adjacencies.add(new Edge(v, dist));
+//    		}
+//
+//        }
+//        
+
     }
 
     public void paint(Graphics g) 
@@ -298,7 +306,7 @@ public class PathPlanning extends JFrame
                     (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
         }
 
-//      displayAdjacency(g);
+      displayAdjacency(g);
         //draw start and end point
         g.setColor(Color.red);
         g.drawArc((int) (start.y * 40 + 155), (int) (start.x * 40 + 175), 10, 10, 0, 360);
