@@ -1,9 +1,12 @@
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -64,7 +67,22 @@ public class PathPlanning extends JFrame
 		}
 		PathPlanning pathPlanning = new PathPlanning();
 		
+		writePathsToFile("output.txt");
+	}
+	
+	public static void writePathsToFile(String fileName) {
+		try {
+			FileWriter fw = new FileWriter(fileName);
 
+			for (ArrayList<Vertex> path : paths) {
+				for (Vertex v : path) {
+					fw.write(v.toString() + "\n");
+				}
+			}
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void readStartGoal(String fileName)
