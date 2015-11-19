@@ -1,4 +1,8 @@
-
+/************************************************************************
+ * Alice Chang (avc2120), Phillip Godzin (pgg2105), Martin Ong (mo2454)
+ * Computational Aspects of Robotics
+ * FALL 2015
+**************************************************************************/
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -50,7 +54,7 @@ public class PathPlanning extends JFrame
 			paths.add(path);
 		}
 		PathPlanning pathPlanning = new PathPlanning();
-		writePathsToFile("output.txt");
+		writePathsToFile("path.txt");
 	}
 	
 	public static void writePathsToFile(String fileName) {
@@ -116,7 +120,6 @@ public class PathPlanning extends JFrame
 					String[] points = in.nextLine().split(" ");
 					object_vertices.add(new Vertex(Double.parseDouble(points[0]), Double.parseDouble(points[1])));	
 				}
-				System.out.println(object_vertices.size());
 				obstacles.add(new Obstacle(object_vertices));
 				if(i == 0)
 				{
@@ -130,22 +133,22 @@ public class PathPlanning extends JFrame
         }
 	}
 	
-	public static void dijkstra(Vertex source)
+	public static void dijkstra(Vertex start)
     {
-        source.minDistance = 0.0;
+        start.minDistance = 0.0;
         PriorityQueue<Vertex> vertexQueue = new PriorityQueue<Vertex>();
-      	vertexQueue.add(source);
+      	vertexQueue.add(start);
 		while (!vertexQueue.isEmpty()) 
 		{
 		    Vertex u = vertexQueue.poll();
 	        for (Edge e : u.adjacencies)
 	        {
 	            Vertex v = e.target;
-		        double distanceThroughU = u.minDistance + e.weight;
-		        if (distanceThroughU < v.minDistance) 
+		        double dist = u.minDistance + e.weight;
+		        if (dist < v.minDistance) 
 				{
 		        	vertexQueue.remove(v);
-					v.minDistance = distanceThroughU ;
+					v.minDistance = dist ;
 					v.previous = u;
 					vertexQueue.add(v);
 				}
@@ -178,7 +181,6 @@ public class PathPlanning extends JFrame
     			}
     		}
     	}
-    	System.out.println(maxw);
     	
     	for(Vertex v: grown_vertices)
     	{
@@ -242,8 +244,7 @@ public class PathPlanning extends JFrame
 	                    ov.adjacencies.add(new Edge(v, dist));
                 	}
                  }
-            }
-            
+            }  
         }
     }
 
@@ -281,23 +282,6 @@ public class PathPlanning extends JFrame
         g.drawArc((int) (goal.y * 40 + 155), (int) (goal.x * 40 + 175), 10, 10, 0, 360);
         
         //draw paths
-
-//	    for (ArrayList<Vertex> path: paths)
-//	    {
-//	    	System.out.println("Path Size: " +  (paths.size()-1));
-//    		System.out.println(paths.indexOf(path));
-//	    	System.out.println(path.size());
-//	    	if(paths.indexOf(path) == paths.size()-1)
-//	    	{
-//	    		g.setColor(Color.yellow);
-//	    	}
-//	    	for(int i = 0; i < path.size()-1; i++)
-//	    	{
-//	    		Vertex v = path.get(i);
-//	    		Vertex ov = path.get(i+1);
-//		    	g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180), (int) (ov.y * 40 + 160), (int) (ov.x * 40 + 180));
-//	    	}
-//        }
         g.setColor(Color.green);
         ArrayList<Vertex> path = getShortestPathTo(goal);
         for (int i = 0; i < path.size()-1; i++)
@@ -314,6 +298,23 @@ public class PathPlanning extends JFrame
     	{
     		System.out.println(o);
     	}
+    }
+    
+    public void drawAllShortestPathToEachVertex(Graphics g)
+    {
+	    for (ArrayList<Vertex> path: paths)
+	    {
+	    	if(paths.indexOf(path) == paths.size()-1)
+	    	{
+	    		g.setColor(Color.yellow);
+	    	}
+	    	for(int i = 0; i < path.size()-1; i++)
+	    	{
+	    		Vertex v = path.get(i);
+	    		Vertex ov = path.get(i+1);
+		    	g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180), (int) (ov.y * 40 + 160), (int) (ov.x * 40 + 180));
+	    	}
+        }
     }
 
 

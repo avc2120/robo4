@@ -1,3 +1,8 @@
+/************************************************************************
+ * Alice Chang (avc2120), Phillip Godzin (pgg2105), Martin Ong (mo2454)
+ * Computational Aspects of Robotics
+ * FALL 2015
+**************************************************************************/
 import java.util.*;
 public class Obstacle
 {
@@ -9,15 +14,6 @@ public class Obstacle
 		num_vertices = 0;
 	}
 
-	public Obstacle(int num)
-	{
-		vertices = new ArrayList<Vertex>();
-		for(int i = 0; i < num; i++)
-		{
-			vertices.add(new Vertex());
-		}
-		num_vertices = num;
-	}
 	public Obstacle(ArrayList<Vertex> vertices)
 	{
 		this.vertices = vertices;
@@ -73,8 +69,7 @@ public class Obstacle
 	
 	public Obstacle clone()
 	{
-		Obstacle new_obstacle = new Obstacle();
-		new_obstacle.setVertices((ArrayList<Vertex>)this.vertices.clone());
+		Obstacle new_obstacle = new Obstacle((ArrayList<Vertex>)this.vertices.clone());
 		for(int i = 0; i < new_obstacle.getSize(); i++)
 		{
 			new_obstacle.setVertex(i, new_obstacle.getVertex(i).clone());
@@ -202,32 +197,26 @@ public class Obstacle
 	public Obstacle convexHull()
 	{
 		Obstacle o = clone();
-		ArrayList<Vertex> vtx = (ArrayList<Vertex>)o.getVertices().clone();
+		ArrayList<Vertex> vtx = o.getVertices();
 		Collections.sort(vtx, new VertexComparator());
 		ArrayList<Vertex> low = new ArrayList<Vertex>();
 		for(Vertex pt : vtx)
 		{
-			while(low.size() >= 2 && Vertex.ccw(low.get(low.size()-2), low.get(low.size()-1), pt ) <= 0)
+			while(low.size() >= 2 && Vertex.counter(low.get(low.size()-2), low.get(low.size()-1), pt ) <= 0)
 				low.remove(low.size()-1);
 			low.add(pt);
 		}
 		low.remove(low.size()-1);
-		
 		ArrayList<Vertex> up = new ArrayList<Vertex>();
-		
-		Collections.sort(vtx, new VertexComparator());
 		Collections.reverse(vtx);
-
 		for(Vertex pt : vtx)
 		{
-			while(up.size() >= 2 && Vertex.ccw(up.get(up.size()-2), up.get(up.size()-1), pt ) <= 0)
+			while(up.size() >= 2 && Vertex.counter(up.get(up.size()-2), up.get(up.size()-1), pt ) <= 0)
 				up.remove(up.size()-1);
 			up.add(pt);
 		}
 		up.remove(up.size()-1);
-		
 		low.addAll(up);
-		
 		o.vertices = (ArrayList<Vertex>)(low.clone());
 		o.num_vertices = o.vertices.size();
 		return o;
@@ -257,8 +246,7 @@ public class Obstacle
 	{
 		if (this.vertices.contains(v1) && this.vertices.contains(v2))
 		{
-			if(!(Math.abs(this.vertices.indexOf(v1)- this.vertices.indexOf(v2)) == 1 || 
-					Math.abs(this.vertices.indexOf(v1)- this.vertices.indexOf(v2)) == vertices.size()-1))
+			if(!(Math.abs(this.vertices.indexOf(v1)- this.vertices.indexOf(v2)) == 1 || Math.abs(this.vertices.indexOf(v1)- this.vertices.indexOf(v2)) == vertices.size()-1))
 				return true;
 			else
 				return false;

@@ -1,3 +1,8 @@
+/************************************************************************
+ * Alice Chang (avc2120), Phillip Godzin (pgg2105), Martin Ong (mo2454)
+ * Computational Aspects of Robotics
+ * FALL 2015
+**************************************************************************/
 public class Edge
 {
     public Vertex target;
@@ -17,14 +22,10 @@ public class Edge
     public boolean equals(Object o) 
     {
         if (o == this) 
-        {
             return true;
-        }
         if (!(o instanceof Edge)) 
-        {
             return false;
-        }
-        Edge c = (Edge) o;
-        return target.equals(c.target) && Double.compare(weight, c.weight) == 0;
+        Edge e = (Edge) o;
+        return target.equals(e.target) && Double.compare(weight, e.weight) == 0;
     }
 }

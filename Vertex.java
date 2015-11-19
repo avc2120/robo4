@@ -1,3 +1,8 @@
+/************************************************************************
+ * Alice Chang (avc2120), Phillip Godzin (pgg2105), Martin Ong (mo2454)
+ * Computational Aspects of Robotics
+ * FALL 2015
+**************************************************************************/
 import java.util.*;
 
 public class Vertex implements Comparable<Vertex>
@@ -137,15 +142,14 @@ public class Vertex implements Comparable<Vertex>
 
 	public static Vertex intersectLineSegments(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
 	{
-		Vertex p = lineIntersection(v1, v2, v3, v4);
-		if(p == null)
+		Vertex v = lineIntersection(v1, v2, v3, v4);
+		if(v == null)
 			return null;
 		double d1 = distance(v1, v2);
 		double d2 = distance(v3, v4);
-		// check the line intersections themselves
-		if(d1 < distance(p, v1) || d1 < distance(p, v2) || d2 < distance(p, v3) || d2 < distance(p, v4))
+		if(d1 < distance(v, v1) || d1 < distance(v, v2) || d2 < distance(v, v3) || d2 < distance(v, v4))
 			return null;
-		return p;
+		return v;
 	}
 
 	public static Vertex rayIntersects(Vertex v1, Vertex v2, Vertex v3, Vertex v4)
@@ -182,13 +186,11 @@ public class Vertex implements Comparable<Vertex>
 	{
 		double dist = distance(this, new Vertex(0,0));
 		if(dist == 0.0)
-		{
 			return new Vertex(0,0);
-		}
 		return this.clone().multiply(1/dist);
 	}
 
-	public static double ccw(Vertex v1, Vertex v2, Vertex v3)
+	public static double counter(Vertex v1, Vertex v2, Vertex v3)
 	{
 		return (v2.x - v1.x)*(v3.y - v1.y) - (v2.y - v1.y)*(v3.x - v1.x);
 	}

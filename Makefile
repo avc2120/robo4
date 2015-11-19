@@ -1,10 +1,10 @@
 all: Edge.class Obstacle.class Vertex.class PathPlanning.class
 
 %.class: %.java
-  javac -d . -classpath . $<
+	javac -d . -classpath . $<
 
-run:
-  java PathPlanning
+run: all
+	java PathPlanning
 
 clean:
-  rm -f *.class 
+	rm -f *.class 
