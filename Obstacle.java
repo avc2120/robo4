@@ -78,40 +78,37 @@ public class Obstacle
 	}
 
 	public Obstacle growObstacles(double robot_width)
-	{	
+	{
+		//Create copy of same obstacle
 		Obstacle new_obstacle = clone();
-		Vertex left, right, normleft, normright;
-		Vertex eleft1, eleft2, eright1, eright2;
+		//Find centroid of the obstacle
 		Vertex center = getCentroid();
 		Vertex new_vertex = new Vertex();
 		for(int i = 0; i < num_vertices; i++) 
 		{
-
-			left = this.vertices.get((i-1 + num_vertices) % num_vertices);
+			//Get adjacent vertices
+			Vertex left = this.vertices.get((i-1 + num_vertices) % num_vertices);
 			new_vertex = this.vertices.get(i % num_vertices);
-			right = this.vertices.get((i+1) % num_vertices);
+			Vertex right = this.vertices.get((i+1) % num_vertices);
 
-			normleft  = left.subtract(new_vertex).perpendicular().unit();
-			normright = new_vertex.subtract(right).perpendicular().unit();
+			//subtract right by left vertex and set to perpendicular unit length
+			Vertex normleft  = left.subtract(new_vertex).perpendicular().unit();
+			Vertex normright = new_vertex.subtract(right).perpendicular().unit();
 
+			//set to positive if negative
 			if(normleft.dot(new_vertex.subtract(center)) < 0)
-			{
 				normleft = normleft.multiply(-1.0);
-			}
 			if(normright.dot(new_vertex.subtract(center)) < 0)
-			{
 				normright = normright.multiply(-1.0);
-			}
+			
+			//multiply unit normal left by robot width
 			normleft = normleft.multiply(robot_width);
-			normright = normright.multiply(robot_width);
+			normright = normright.multiply(robot_width);	
 			
-			eleft1 = left.translate(normleft);
-			eleft2 = new_vertex.translate(normleft);
-			eright1 = new_vertex.translate(normright);
-			eright2 = right.translate(normright);
+			//find intersection of lines
+			new_vertex = Vertex.lineIntersection(left.translate(normleft), new_vertex.translate(normleft), new_vertex.translate(normright), right.translate(normright));
 			
-			new_vertex = Vertex.lineIntersection(eleft1, eleft2, eright1, eright2);
-					
+			//set new grown vertex of polygon
 			new_obstacle.setVertex(i, new_vertex);
 		}
 		return new_obstacle;
@@ -136,18 +133,16 @@ public class Obstacle
 		Vertex center = getCentroid();
 		Vertex direction = v.subtract(center);
 		Vertex v2 = v.translate(direction);
-		Vertex v3, v4, inter;
 		int count = 0;
 		for(int i = 0; i < num_vertices; i++) 
 		{
-			v3 = this.vertices.get(i % num_vertices).clone();
-			v4 = this.vertices.get((i+1) % num_vertices).clone();
-			inter = Vertex.rayIntersects(v,v2, v3,v4);
+			Vertex v3 = this.vertices.get(i % num_vertices).clone();
+			Vertex v4 = this.vertices.get((i+1) % num_vertices).clone();
+			Vertex inter = Vertex.rayIntersects(v,v2, v3,v4);
 			if(inter != null) 
 			{
-				if(inter.equals(v))
-					continue;
-				count += 1;
+				if(!inter.equals(v))
+					count += 1;
 			}
 		}
 		return count % 2 == 1;
@@ -160,9 +155,7 @@ public class Obstacle
 		for(Vertex vertex: vertices)
 		{
 			if(this.isInterior(vertex))
-			{
 				overlapping_vertices.add(vertex);
-			}
 		}
 		return overlapping_vertices;
 	}
@@ -194,32 +187,34 @@ public class Obstacle
 	    			 return 0;
 	     }
 	 }
+	
 	public Obstacle convexHull()
 	{
+		//Clones original obstacle
 		Obstacle o = clone();
 		ArrayList<Vertex> vtx = o.getVertices();
+		//Sort by x and then y values of Vertex
 		Collections.sort(vtx, new VertexComparator());
-		ArrayList<Vertex> low = new ArrayList<Vertex>();
-		for(Vertex pt : vtx)
-		{
-			while(low.size() >= 2 && Vertex.counter(low.get(low.size()-2), low.get(low.size()-1), pt ) <= 0)
-				low.remove(low.size()-1);
-			low.add(pt);
-		}
-		low.remove(low.size()-1);
-		ArrayList<Vertex> up = new ArrayList<Vertex>();
+		ArrayList<Vertex> low = convexHelper(vtx);
 		Collections.reverse(vtx);
-		for(Vertex pt : vtx)
-		{
-			while(up.size() >= 2 && Vertex.counter(up.get(up.size()-2), up.get(up.size()-1), pt ) <= 0)
-				up.remove(up.size()-1);
-			up.add(pt);
-		}
-		up.remove(up.size()-1);
-		low.addAll(up);
+		ArrayList<Vertex> high = convexHelper(vtx);
+		low.addAll(high);
 		o.vertices = (ArrayList<Vertex>)(low.clone());
 		o.num_vertices = o.vertices.size();
 		return o;
+	}
+	
+	public ArrayList<Vertex> convexHelper(ArrayList<Vertex>  vtx)
+	{
+		ArrayList<Vertex> v = new ArrayList<Vertex>();
+		for(Vertex pt : vtx)
+		{
+			while(v.size() >= 2 && Vertex.counter(v.get(v.size()-2), v.get(v.size()-1), pt ) <= 0)
+				v.remove(v.size()-1);
+			v.add(pt);
+		}
+		v.remove(v.size()-1);
+		return v;
 	}
 
 

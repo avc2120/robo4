@@ -135,8 +135,11 @@ public class PathPlanning extends JFrame
 	
 	public static void dijkstra(Vertex start)
     {
+		//set initial source minimum distance to 0
         start.minDistance = 0.0;
+        //priority queue sorted by minimum distance
         PriorityQueue<Vertex> queue = new PriorityQueue<Vertex>();
+        //put start into queue
         queue.add(start);
 		while (!queue.isEmpty()) 
 		{
@@ -145,6 +148,7 @@ public class PathPlanning extends JFrame
 	        {
 	            Vertex v = e.target;
 		        double dist = u.minDistance + e.weight;
+		        //if found new better path, add it to the queue
 		        if (dist < v.minDistance) 
 				{
 		        	queue.remove(v);
@@ -159,10 +163,12 @@ public class PathPlanning extends JFrame
     public static ArrayList<Vertex> getShortestPathTo(Vertex target)
     {
         ArrayList<Vertex> path = new ArrayList<Vertex>();
+        //iterates through the shortest path to specified vertex backwards
         for (Vertex vertex = target; vertex != null; vertex = vertex.previous)
         {
             path.add(vertex);
         }
+        //reverse list to get path from start
         Collections.reverse(path);
         return path;
     }
