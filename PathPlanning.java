@@ -1,12 +1,7 @@
 
 import javax.swing.*;
-
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 
@@ -55,7 +50,6 @@ public class PathPlanning extends JFrame
 			paths.add(path);
 		}
 		PathPlanning pathPlanning = new PathPlanning();
-		
 		writePathsToFile("output.txt");
 	}
 	
@@ -104,7 +98,8 @@ public class PathPlanning extends JFrame
 
 	public static void readObstacles(String fileName)
 	{
-		try {
+		try 
+		{
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             Scanner in = new Scanner(bufferedReader);
@@ -172,6 +167,7 @@ public class PathPlanning extends JFrame
     public static void displayAdjacency(Graphics g)
     {
     	double maxw = 0.0;
+
     	for (Vertex v : grown_vertices) 
     	{
     		for (Edge e : v.adjacencies) 
@@ -193,7 +189,8 @@ public class PathPlanning extends JFrame
     			Color color = e.weight == Double.POSITIVE_INFINITY? new Color(0,0,0,0): new Color(colorval, colorval, colorval);
   
 	            g.setColor(color);
-	            g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180), (int) (dest.y * 40 + 160), (int) (dest.x * 40 + 180));
+	            g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180),
+	                    (int) (dest.y * 40 + 160), (int) (dest.x * 40 + 180));
     		}
     	}
     }
@@ -231,7 +228,7 @@ public class PathPlanning extends JFrame
 							break;
 						}
 //                		//If intersect other polygons
-                		else if(obs.intersectObstacle(v, ov))
+                		else if(obs.intersectObstacle(ov, v))
 						{
 							v.adjacencies.add(new Edge(ov, Double.POSITIVE_INFINITY));
 							edge_added = true;
@@ -246,6 +243,7 @@ public class PathPlanning extends JFrame
                 	}
                  }
             }
+            
         }
     }
 
@@ -276,30 +274,26 @@ public class PathPlanning extends JFrame
                     (int) (vertices.get(vertices.size() - 1).y * 40 + 160), (int) (vertices.get(vertices.size() - 1).x * 40 + 180));
         }
 
-//        displayAdjacency(g);
+        displayAdjacency(g);
         //draw start and end point
         g.setColor(Color.red);
         g.drawArc((int) (start.y * 40 + 155), (int) (start.x * 40 + 175), 10, 10, 0, 360);
         g.drawArc((int) (goal.y * 40 + 155), (int) (goal.x * 40 + 175), 10, 10, 0, 360);
         
-        //draw paths
-        g.setColor(new Color(0,0,0,0));
-	    for (ArrayList<Vertex> path: paths)
-	    {
-	    	System.out.println("Path Size: " +  (paths.size()-1));
-    		System.out.println(paths.indexOf(path));
-	    	if(paths.indexOf(path) == paths.size()-1)
-	    	{
-	    		g.setColor(Color.magenta);
-	    	}
-	    	System.out.println(path.size());
-	    	for(int i = 0; i < path.size()-1; i++)
-	    	{
-	    		Vertex v = path.get(i);
-	    		Vertex ov = path.get(i+1);
-		    	g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180), (int) (ov.y * 40 + 160), (int) (ov.x * 40 + 180));
-	    	}
-        }
+//        //draw paths
+//        g.setColor(Color.magenta);
+//	    for (ArrayList<Vertex> path: paths)
+//	    {
+//	    	System.out.println("Path Size: " +  (paths.size()-1));
+//    		System.out.println(paths.indexOf(path));
+//	    	System.out.println(path.size());
+//	    	for(int i = 0; i < path.size()-1; i++)
+//	    	{
+//	    		Vertex v = path.get(i);
+//	    		Vertex ov = path.get(i+1);
+//		    	g.drawLine((int) (v.y * 40 + 160), (int) (v.x * 40 + 180), (int) (ov.y * 40 + 160), (int) (ov.x * 40 + 180));
+//	    	}
+//        }
     }
 
     public void printObstacles(ArrayList<Obstacle> obstacles)

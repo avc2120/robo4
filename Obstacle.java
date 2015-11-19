@@ -85,19 +85,17 @@ public class Obstacle
 	public Obstacle growObstacles(double robot_width)
 	{	
 		Obstacle new_obstacle = clone();
-		Vertex left, right, normleft, normright, p;
+		Vertex left, right, normleft, normright;
 		Vertex eleft1, eleft2, eright1, eright2;
 		Vertex center = getCentroid();
 		Vertex new_vertex = new Vertex();
-		/* move the line segments out */
 		for(int i = 0; i < num_vertices; i++) 
 		{
-			// grab two edges
+
 			left = this.vertices.get((i-1 + num_vertices) % num_vertices);
 			new_vertex = this.vertices.get(i % num_vertices);
 			right = this.vertices.get((i+1) % num_vertices);
-			
-			/* turn the normals right side out (center is always inside the polygon */
+
 			normleft  = left.subtract(new_vertex).perpendicular().unit();
 			normright = new_vertex.subtract(right).perpendicular().unit();
 
@@ -112,13 +110,11 @@ public class Obstacle
 			normleft = normleft.multiply(robot_width);
 			normright = normright.multiply(robot_width);
 			
-			/* move the points out */
 			eleft1 = left.translate(normleft);
 			eleft2 = new_vertex.translate(normleft);
 			eright1 = new_vertex.translate(normright);
 			eright2 = right.translate(normright);
 			
-			/* find the intersection */
 			new_vertex = Vertex.lineIntersection(eleft1, eleft2, eright1, eright2);
 					
 			new_obstacle.setVertex(i, new_vertex);
@@ -147,11 +143,13 @@ public class Obstacle
 		Vertex v2 = v.translate(direction);
 		Vertex v3, v4, inter;
 		int count = 0;
-		for(int i = 0; i < num_vertices; i++) {
+		for(int i = 0; i < num_vertices; i++) 
+		{
 			v3 = this.vertices.get(i % num_vertices).clone();
 			v4 = this.vertices.get((i+1) % num_vertices).clone();
 			inter = Vertex.rayIntersects(v,v2, v3,v4);
-			if(inter != null) {
+			if(inter != null) 
+			{
 				if(inter.equals(v))
 					continue;
 				count += 1;
@@ -204,13 +202,13 @@ public class Obstacle
 	public Obstacle convexHull()
 	{
 		Obstacle o = clone();
-		ArrayList<Vertex> vtx = o.getVertices();
+		ArrayList<Vertex> vtx = (ArrayList<Vertex>)o.getVertices().clone();
 		Collections.sort(vtx, new VertexComparator());
 		ArrayList<Vertex> low = new ArrayList<Vertex>();
 		for(Vertex pt : vtx)
 		{
 			while(low.size() >= 2 && Vertex.ccw(low.get(low.size()-2), low.get(low.size()-1), pt ) <= 0)
-				low.remove(low.size()-1); //pop
+				low.remove(low.size()-1);
 			low.add(pt);
 		}
 		low.remove(low.size()-1);
@@ -247,7 +245,8 @@ public class Obstacle
 			{
 				return true;
 			}
-			if((p1.equals(p3) && p2.equals(p4)) || (p2.equals(p3) && p1.equals(p4))) {
+			if((p1.equals(p3) && p2.equals(p4)) || (p2.equals(p3) && p1.equals(p4))) 
+			{
 				return false;
 			}
 		}
