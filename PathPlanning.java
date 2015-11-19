@@ -60,11 +60,9 @@ public class PathPlanning extends JFrame
 	public static void writePathsToFile(String fileName) {
 		try {
 			FileWriter fw = new FileWriter(fileName);
-
-			for (ArrayList<Vertex> path : paths) {
-				for (Vertex v : path) {
-					fw.write(v.toString() + "\n");
-				}
+            ArrayList<Vertex> path = getShortestPathTo(goal);
+			for (Vertex v : path) {
+				fw.write(v.toString() + "\n");
 			}
 			fw.close();
 		} catch (IOException e) {
