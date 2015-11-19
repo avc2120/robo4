@@ -18,7 +18,7 @@ public class PathPlanning extends JFrame
 	private static ArrayList<Obstacle> grown_obstacles = new ArrayList<Obstacle>();
 	private static ArrayList<Vertex> grown_vertices = new ArrayList<Vertex>();
 	private static ArrayList<ArrayList<Vertex>> paths = new ArrayList<ArrayList<Vertex>>();
-	public static final double robot_width = 0.35;
+	public static final double robot_width = 0.50;
 	
 	public PathPlanning() 
 	{
